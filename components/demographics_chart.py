@@ -80,9 +80,9 @@ def create_demographics_chart(demo_df: pd.DataFrame, show_percentages: bool = Tr
         font=template['layout']['font'],
         paper_bgcolor=template['layout']['paper_bgcolor'],
         plot_bgcolor=template['layout']['plot_bgcolor'],
-        margin=dict(l=60, r=30, t=80, b=100),
+        margin=dict(l=60, r=60, t=80, b=100),
         height=400,
-        bargap=0.4
+        bargap=0.6
     )
     
     if insight:
