@@ -1,7 +1,7 @@
 """Carnegie brand colors and Plotly styling utilities."""
 
 CARNEGIE_COLORS = {
-    'primary': '#1B365D',
+    'primary': '#002633',
     'secondary': '#FF6B35',
     'neutral_light': '#F5F5F5',
     'neutral_dark': '#333333',
@@ -11,7 +11,7 @@ CARNEGIE_COLORS = {
 }
 
 CHART_PALETTE = [
-    '#1B365D',  # Navy (primary)
+    '#002633',  # Navy (primary)
     '#FF6B35',  # Orange (secondary)
     '#4A90E2',  # Light blue
     '#50C878',  # Emerald
@@ -23,7 +23,7 @@ CHART_PALETTE = [
 
 DEMOGRAPHICS_PALETTE = {
     'Hispanic/Latino': '#FF6B35',
-    'White': '#1B365D',
+    'White': '#002633',
     'Black': '#4A90E2',
     'Asian': '#50C878',
     'Other': '#9B59B6',

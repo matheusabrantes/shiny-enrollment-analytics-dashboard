@@ -43,7 +43,7 @@ app_ui = ui.page_fluid(
         ui.tags.link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"),
         ui.tags.style("""
             :root {
-                --primary: #1B365D;
+                --primary: #002633;
                 --secondary: #FF6B35;
                 --neutral-light: #F5F5F5;
                 --neutral-dark: #333333;
