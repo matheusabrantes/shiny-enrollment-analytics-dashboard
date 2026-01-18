@@ -436,7 +436,7 @@ def server(input, output, session):
     @render.text
     def kpi_yield():
         metrics = calculate_metrics(filtered_data())
-        return f"{metrics['avg_yield_rate']:.1f}%"
+        return f"{metrics['overall_yield_rate']:.1f}%"
     
     # Chart Outputs
     @render_widget
