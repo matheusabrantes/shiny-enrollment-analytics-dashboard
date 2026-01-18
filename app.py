@@ -67,9 +67,9 @@ app_ui = ui.page_fluid(
             }
             
             .header-content {
-                max-width: 1400px;
+                max-width: 1336px;
                 margin: 0 auto;
-                padding: 0 32px;
+                padding: 0;
             }
             
             .dashboard-title {
@@ -100,9 +100,9 @@ app_ui = ui.page_fluid(
                 flex-wrap: wrap;
                 align-items: center;
                 gap: 24px;
-                max-width: 1400px;
+                max-width: 1336px;
                 margin: 0 auto;
-                padding: 0 32px;
+                padding: 0;
             }
             
             .filter-item {
@@ -142,9 +142,9 @@ app_ui = ui.page_fluid(
             }
             
             .main-content {
-                max-width: 1400px;
+                max-width: 1336px;
                 margin: 0 auto;
-                padding: 24px 32px;
+                padding: 24px 0;
             }
             
             .kpi-grid {
