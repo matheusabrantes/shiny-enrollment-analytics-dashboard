@@ -61,7 +61,7 @@ app_ui = ui.page_fluid(
             .dashboard-header {
                 background: linear-gradient(135deg, var(--primary) 0%, #2A4A7A 100%);
                 color: var(--white);
-                padding: 24px 32px;
+                padding: 24px 0;
                 margin-bottom: 0;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             }
@@ -69,6 +69,7 @@ app_ui = ui.page_fluid(
             .header-content {
                 max-width: 1400px;
                 margin: 0 auto;
+                padding: 0 32px;
             }
             
             .dashboard-title {
@@ -87,7 +88,7 @@ app_ui = ui.page_fluid(
             
             .filter-panel {
                 background: var(--white);
-                padding: 16px 32px;
+                padding: 16px 0;
                 border-bottom: 1px solid #E0E0E0;
                 position: sticky;
                 top: 0;
@@ -101,6 +102,7 @@ app_ui = ui.page_fluid(
                 gap: 24px;
                 max-width: 1400px;
                 margin: 0 auto;
+                padding: 0 32px;
             }
             
             .filter-item {
