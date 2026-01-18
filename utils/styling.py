@@ -23,10 +23,10 @@ CHART_PALETTE = [
 
 DEMOGRAPHICS_PALETTE = {
     'Hispanic/Latino': '#FF6B35',   # Carnegie orange (brand alignment)
-    'White': '#5C6BC0',             # Indigo blue (neutral, professional)
+    'White': '#BDBDBD',             # Gray (neutral)
     'Black': '#66BB6A',             # Green (positive, no negative connotation)
     'Asian': '#FFA726',             # Warm orange (distinguishable)
-    'Other': '#BDBDBD',             # Gray (residual category)
+    'Other': '#5C6BC0',             # Indigo blue (residual category)
 }
 
 
