@@ -99,7 +99,7 @@ def create_comparison_chart(top_institutions: pd.DataFrame, metric: str = 'yield
         font=template['layout']['font'],
         paper_bgcolor=template['layout']['paper_bgcolor'],
         plot_bgcolor=template['layout']['plot_bgcolor'],
-        margin=dict(l=200, r=80, t=60, b=80),
+        margin=dict(l=200, r=80, t=60, b=100),
         height=450,
         showlegend=False
     )
@@ -110,7 +110,7 @@ def create_comparison_chart(top_institutions: pd.DataFrame, metric: str = 'yield
             xref="paper",
             yref="paper",
             x=0.5,
-            y=-0.15,
+            y=-0.25,
             showarrow=False,
             font=dict(size=11, color=CARNEGIE_COLORS['neutral_dark']),
             align="center"

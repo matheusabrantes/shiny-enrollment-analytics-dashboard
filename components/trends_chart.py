@@ -90,7 +90,7 @@ def create_trends_chart(trends_df: pd.DataFrame) -> go.Figure:
         font=template['layout']['font'],
         paper_bgcolor=template['layout']['paper_bgcolor'],
         plot_bgcolor=template['layout']['plot_bgcolor'],
-        margin=dict(l=60, r=30, t=80, b=80),
+        margin=dict(l=60, r=30, t=80, b=100),
         height=400,
         hovermode='x unified'
     )
@@ -101,7 +101,7 @@ def create_trends_chart(trends_df: pd.DataFrame) -> go.Figure:
             xref="paper",
             yref="paper",
             x=0.5,
-            y=-0.18,
+            y=-0.28,
             showarrow=False,
             font=dict(size=11, color=CARNEGIE_COLORS['neutral_dark']),
             align="center"

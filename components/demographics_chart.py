@@ -22,17 +22,15 @@ def create_demographics_chart(demo_df: pd.DataFrame, show_percentages: bool = Tr
         ('pct_other', 'Other'),
     ]
     
-    colors = list(DEMOGRAPHICS_PALETTE.values())
-    
     fig = go.Figure()
     
-    for i, (col, name) in enumerate(demo_categories):
+    for col, name in demo_categories:
         if col in demo_df.columns:
             fig.add_trace(go.Bar(
                 name=name,
                 x=[f"Fall {y}" for y in demo_df['year']],
                 y=demo_df[col],
-                marker_color=colors[i % len(colors)],
+                marker_color=DEMOGRAPHICS_PALETTE.get(name, '#999999'),
                 text=demo_df[col].apply(lambda x: f"{x:.1f}%"),
                 textposition='inside',
                 textfont=dict(size=10, color='white'),
@@ -82,7 +80,7 @@ def create_demographics_chart(demo_df: pd.DataFrame, show_percentages: bool = Tr
         font=template['layout']['font'],
         paper_bgcolor=template['layout']['paper_bgcolor'],
         plot_bgcolor=template['layout']['plot_bgcolor'],
-        margin=dict(l=60, r=30, t=80, b=80),
+        margin=dict(l=60, r=30, t=80, b=100),
         height=400,
         bargap=0.3
     )
@@ -93,7 +91,7 @@ def create_demographics_chart(demo_df: pd.DataFrame, show_percentages: bool = Tr
             xref="paper",
             yref="paper",
             x=0.5,
-            y=-0.18,
+            y=-0.28,
             showarrow=False,
             font=dict(size=11, color=CARNEGIE_COLORS['neutral_dark']),
             align="center"

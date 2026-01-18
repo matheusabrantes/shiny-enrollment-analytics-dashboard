@@ -20,7 +20,7 @@ def create_funnel_chart(funnel_data: dict) -> go.Figure:
         elif i == 1:
             text_labels.append(f"{val:,}<br><span style='font-size:12px'>{stage_rates[i]}% admit rate</span>")
         else:
-            text_labels.append(f"{val:,}<br><span style='font-size:12px'>{stage_rates[i]}% yield rate</span>")
+            text_labels.append(f"{val:,}<br><span style='font-size:14px'>{stage_rates[i]}%</span><br><span style='font-size:11px'>yield rate</span>")
     
     # Funnel colors from light to dark
     colors = [CARNEGIE_COLORS['primary'], CARNEGIE_COLORS['info'], CARNEGIE_COLORS['secondary']]
@@ -31,7 +31,7 @@ def create_funnel_chart(funnel_data: dict) -> go.Figure:
         textinfo="text",
         text=text_labels,
         textposition="inside",
-        textfont=dict(size=14, color="white"),
+        textfont=dict(size=16, color="white"),
         marker=dict(
             color=colors,
             line=dict(width=2, color="white")
