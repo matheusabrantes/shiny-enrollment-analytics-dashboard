@@ -72,7 +72,8 @@ def create_trends_chart(trends_df: pd.DataFrame) -> go.Figure:
             tickvals=trends_df['year'].tolist(),
             ticktext=[f"Fall {y}" for y in trends_df['year']],
             showgrid=True,
-            gridcolor='rgba(0,0,0,0.1)'
+            gridcolor='rgba(0,0,0,0.1)',
+            dtick=1
         ),
         yaxis=dict(
             title="Rate (%)",

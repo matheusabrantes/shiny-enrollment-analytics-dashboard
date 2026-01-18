@@ -90,7 +90,8 @@ def create_comparison_chart(top_institutions: pd.DataFrame, metric: str = 'yield
         xaxis=dict(
             title=metric.replace('_', ' ').title() + (f" ({config['suffix']})" if config['suffix'] else ""),
             showgrid=True,
-            gridcolor='rgba(0,0,0,0.1)'
+            gridcolor='rgba(0,0,0,0.1)',
+            range=[0, 100] if metric == 'yield_rate' or metric == 'admit_rate' else None
         ),
         yaxis=dict(
             title="",
