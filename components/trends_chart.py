@@ -23,7 +23,7 @@ def create_trends_chart(trends_df: pd.DataFrame) -> go.Figure:
         mode='lines+markers',
         line=dict(color=CARNEGIE_COLORS['primary'], width=3),
         marker=dict(size=10, symbol='circle'),
-        hovertemplate="<b>Fall %{x}</b><br>Admit Rate: %{y:.1f}%<extra></extra>"
+        hovertemplate="<b>%{x}</b><br>Admit Rate: %{y:.1f}%<extra></extra>"
     ))
     
     # Yield Rate line
@@ -34,7 +34,7 @@ def create_trends_chart(trends_df: pd.DataFrame) -> go.Figure:
         mode='lines+markers',
         line=dict(color=CARNEGIE_COLORS['secondary'], width=3),
         marker=dict(size=10, symbol='diamond'),
-        hovertemplate="<b>Fall %{x}</b><br>Yield Rate: %{y:.1f}%<extra></extra>"
+        hovertemplate="<b>%{x}</b><br>Yield Rate: %{y:.1f}%<extra></extra>"
     ))
     
     # Overall Conversion Rate line
@@ -45,7 +45,7 @@ def create_trends_chart(trends_df: pd.DataFrame) -> go.Figure:
         mode='lines+markers',
         line=dict(color=CHART_PALETTE[2], width=3, dash='dot'),
         marker=dict(size=10, symbol='square'),
-        hovertemplate="<b>Fall %{x}</b><br>Overall Conversion: %{y:.1f}%<extra></extra>"
+        hovertemplate="<b>%{x}</b><br>Overall Conversion: %{y:.1f}%<extra></extra>"
     ))
     
     # Calculate trends for annotation
