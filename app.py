@@ -27,6 +27,7 @@ from components.funnel_chart import create_funnel_chart
 from components.trends_chart import create_trends_chart
 from components.demographics_chart import create_demographics_chart
 from components.comparison_chart import create_comparison_chart
+from components.geographic_map import create_state_map
 
 
 # Load data at startup
@@ -327,6 +328,31 @@ app_ui = ui.page_fluid(
             class_="chart-row"
         ),
         
+        # Geographic Distribution Map
+        ui.div(
+            ui.div("Geographic Distribution", class_="section-title"),
+            ui.div(
+                ui.input_radio_buttons(
+                    "map_metric",
+                    None,
+                    choices={
+                        "yield_rate": "Yield Rate",
+                        "enrolled_total": "Total Enrollment",
+                        "num_institutions": "Institutions"
+                    },
+                    selected="yield_rate",
+                    inline=True
+                ),
+                class_="comparison-controls"
+            ),
+            output_widget("geographic_map"),
+            ui.p(
+                "This map aligns with Carnegie's Geospatial Analysis and Market Opportunity Analysis services.",
+                style="font-size: 12px; color: #666; margin-top: 12px; text-align: center;"
+            ),
+            class_="chart-section"
+        ),
+        
         # Institution Comparison
         ui.div(
             ui.div("Institution Benchmarking", class_="section-title"),
@@ -427,6 +453,11 @@ def server(input, output, session):
     def demographics_chart():
         demo_df = calculate_demographics_by_year(filtered_data())
         return create_demographics_chart(demo_df)
+    
+    @render_widget
+    def geographic_map():
+        metric = input.map_metric()
+        return create_state_map(filtered_data(), metric=metric)
     
     @render_widget
     def comparison_chart():

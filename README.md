@@ -88,9 +88,13 @@ shiny run app.py
 
 3. **Conversion Trends:** Multi-line chart tracking admit rates, yield rates, and overall conversion over time
 
-4. **Demographics:** Stacked bar chart showing enrollment diversity by race/ethnicity across years
+4. **Geographic Distribution:** Interactive choropleth map showing state-level enrollment metrics ⭐ NEW
+   - Toggle between Yield Rate, Total Enrollment, and Institution count
+   - Aligned with Carnegie's Geospatial Analysis services
 
-5. **Institution Comparison:** Horizontal bar chart benchmarking top institutions by:
+5. **Demographics:** Stacked bar chart showing enrollment diversity by race/ethnicity across years
+
+6. **Institution Comparison:** Horizontal bar chart benchmarking top institutions by:
    - Yield Rate (default)
    - Total Enrollment
    - Admit Rate
@@ -101,7 +105,7 @@ shiny run app.py
 
 ### Color Palette
 Inspired by Carnegie's brand identity:
-- **Primary:** Navy Blue (#1B365D) - trust, professionalism
+- **Primary:** Navy Blue (#002633) - trust, professionalism
 - **Secondary:** Coral Orange (#FF6B35) - energy, action
 - **Neutrals:** White, light gray backgrounds for readability
 

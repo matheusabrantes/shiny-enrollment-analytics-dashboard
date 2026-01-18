@@ -6,3 +6,4 @@ from .funnel_chart import create_funnel_chart
 from .trends_chart import create_trends_chart
 from .demographics_chart import create_demographics_chart
 from .comparison_chart import create_comparison_chart
+from .geographic_map import create_state_map
