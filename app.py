@@ -1,8 +1,7 @@
 """
-Carnegie Higher Education Enrollment Funnel Analytics Dashboard
+Higher Education Enrollment Funnel Analytics Dashboard
 
 A production-grade interactive data visualization dashboard using Shiny for Python.
-Built for Carnegie Data Visualization Specialist Interview.
 
 Author: Matheus Abrantes
 Date: January 2026
@@ -347,7 +346,7 @@ app_ui = ui.page_fluid(
             ),
             output_widget("geographic_map"),
             ui.p(
-                "This map aligns with Carnegie's Geospatial Analysis and Market Opportunity Analysis services.",
+                "Interactive geospatial analysis for market opportunity insights.",
                 style="font-size: 12px; color: #666; margin-top: 12px; text-align: center;"
             ),
             class_="chart-section"
@@ -377,7 +376,7 @@ app_ui = ui.page_fluid(
         # Footer
         ui.div(
             ui.HTML("""
-                <p><strong>Carnegie Higher Education Enrollment Analytics Dashboard</strong></p>
+                <p><strong>Higher Education Enrollment Analytics Dashboard</strong></p>
                 <p>Data Source: IPEDS (Integrated Postsecondary Education Data System) - U.S. Department of Education</p>
                 <p>Built by <a href="https://github.com/matheusabrantes" target="_blank">Matheus Abrantes</a> | January 2026</p>
             """),

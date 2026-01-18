@@ -1,8 +1,7 @@
-# Carnegie Higher Education Enrollment Dashboard
+# Higher Education Enrollment Analytics Dashboard
 
 Interactive data visualization dashboard analyzing enrollment funnel performance for 370+ U.S. higher education institutions (2022-2024).
 
-**Built for:** Carnegie Data Visualization Specialist Interview  
 **Author:** Matheus Abrantes  
 **Date:** January 2026
 
@@ -10,7 +9,7 @@ Interactive data visualization dashboard analyzing enrollment funnel performance
 
 ## 🎯 Project Overview
 
-This dashboard demonstrates enrollment analytics capabilities relevant to Carnegie's work in higher education marketing and enrollment strategy. It visualizes:
+This dashboard demonstrates enrollment analytics capabilities for higher education marketing and enrollment strategy. It visualizes:
 
 - **Enrollment Funnel:** Applicants → Admitted → Enrolled conversion flow
 - **Trends Analysis:** Conversion rates and yield trends over time
@@ -88,9 +87,9 @@ shiny run app.py
 
 3. **Conversion Trends:** Multi-line chart tracking admit rates, yield rates, and overall conversion over time
 
-4. **Geographic Distribution:** Interactive choropleth map showing state-level enrollment metrics ⭐ NEW
+4. **Geographic Distribution:** Interactive choropleth map showing state-level enrollment metrics
    - Toggle between Yield Rate, Total Enrollment, and Institution count
-   - Aligned with Carnegie's Geospatial Analysis services
+   - Supports geospatial analysis and market opportunity insights
 
 5. **Demographics:** Stacked bar chart showing enrollment diversity by race/ethnicity across years
 
@@ -104,7 +103,7 @@ shiny run app.py
 ## 🎨 Design Decisions
 
 ### Color Palette
-Inspired by Carnegie's brand identity:
+Professional color scheme:
 - **Primary:** Navy Blue (#002633) - trust, professionalism
 - **Secondary:** Coral Orange (#FF6B35) - energy, action
 - **Neutrals:** White, light gray backgrounds for readability
@@ -150,7 +149,7 @@ shiny-enrollment-analytics-dashboard/
     ├── __init__.py
     ├── data_loader.py          # Data loading utilities
     ├── calculations.py         # Metric calculations
-    └── styling.py              # Carnegie brand colors & themes
+    └── styling.py              # Brand colors & themes
 ```
 
 ---
@@ -176,21 +175,6 @@ The raw IPEDS data is in wide format with columns for each year. The `data_loade
 
 ---
 
-## 📝 Interview Context
-
-This project was built in a weekend (January 2026) to demonstrate:
-
-1. **Technical Skills:** Shiny for Python, Plotly, data wrangling with Pandas
-2. **Domain Knowledge:** Understanding of higher education enrollment metrics
-3. **Design Acumen:** Clean, professional aesthetic aligned with Carnegie's brand
-4. **Storytelling:** Clear narrative through data (funnel → trends → insights)
-5. **Initiative:** Proactive research on Carnegie's business and custom dashboard creation
-
-**Presented to:** Greg Kegeles, CPO/Head of AI at Carnegie  
-**Interview Date:** January 20, 2026
-
----
-
 ## 📧 Contact
 
 **Matheus Abrantes**  
@@ -201,4 +185,4 @@ Senior Data Scientist | AI Engineer
 
 ## 📄 License
 
-This project is for portfolio and interview purposes. Data source: IPEDS (public domain).
+This project is for portfolio purposes. Data source: IPEDS (public domain).
