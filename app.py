@@ -11,7 +11,14 @@ from shiny import App, reactive, render, ui
 from shinywidgets import output_widget, render_widget
 import pandas as pd
 
-from utils.data_loader import load_ipeds_data, get_unique_years, get_unique_institutions
+from utils.data_loader import (
+    load_ipeds_data, 
+    get_unique_years, 
+    get_unique_institutions,
+    get_unique_regions,
+    get_unique_sizes,
+    get_states_by_region
+)
 from utils.calculations import (
     calculate_metrics,
     calculate_funnel_data,
@@ -34,6 +41,9 @@ print("Loading IPEDS enrollment data...")
 DATA = load_ipeds_data()
 YEARS = get_unique_years(DATA)
 INSTITUTIONS = get_unique_institutions(DATA)
+REGIONS = get_unique_regions(DATA)
+SIZES = get_unique_sizes(DATA)
+STATES_BY_REGION = get_states_by_region(DATA)
 print(f"Loaded {len(DATA)} records for {len(INSTITUTIONS)} institutions across {len(YEARS)} years")
 
 
@@ -283,7 +293,7 @@ app_ui = ui.page_fluid(
         create_header(),
         
         # Filters
-        create_filters(YEARS, INSTITUTIONS),
+        create_filters(YEARS, INSTITUTIONS, REGIONS, STATES_BY_REGION, SIZES),
         
         # Main Content
         ui.div(
@@ -414,6 +424,32 @@ def server(input, output, session):
             years = [int(y) for y in selected_years]
             df = df[df['year'].isin(years)]
         
+        # Apply region/state filter
+        selected_region_state = input.region_state_filter()
+        if selected_region_state:
+            # Parse selections: regions vs states
+            selected_regions = []
+            selected_states = []
+            for item in selected_region_state:
+                if item.startswith('state:'):
+                    # Format: "state:Region:ST"
+                    parts = item.split(':')
+                    if len(parts) >= 3:
+                        selected_states.append(parts[2])
+                else:
+                    # It's a region
+                    selected_regions.append(item)
+            
+            # Filter by regions OR states
+            if selected_regions or selected_states:
+                mask = df['region'].isin(selected_regions) | df['state'].isin(selected_states)
+                df = df[mask]
+        
+        # Apply size filter
+        selected_sizes = input.size_filter()
+        if selected_sizes:
+            df = df[df['institution_size'].isin(selected_sizes)]
+        
         # Apply institution filter
         selected_institutions = input.institution_filter()
         if selected_institutions and "All Institutions" not in selected_institutions:
@@ -426,6 +462,8 @@ def server(input, output, session):
     def reset_filters():
         """Reset all filters to default values."""
         ui.update_checkbox_group("year_filter", selected=[str(y) for y in YEARS])
+        ui.update_selectize("region_state_filter", selected=[])
+        ui.update_selectize("size_filter", selected=[])
         ui.update_selectize("institution_filter", selected=["All Institutions"])
     
     # KPI Outputs
