@@ -142,13 +142,13 @@ def create_state_map(df: pd.DataFrame, metric: str = 'yield_rate') -> go.Figure:
     
     if metric == 'yield_rate':
         # Calculate true national yield rate (total enrolled / total admitted)
-        national_yield = (state_data['enrolled_total'].sum() / state_data['admitted_total'].sum()) * 100
+        national_yield = (state_data['enrolled_total'].sum() / state_data['admissions'].sum()) * 100
         insight = f"Highest yield: {top_state['state']} ({top_state['yield_rate']:.1f}%) | National avg: {national_yield:.1f}%"
     elif metric == 'enrolled_total':
         insight = f"Most enrolled: {top_state['state']} ({top_state['enrolled_total']:,}) | Total: {state_data['enrolled_total'].sum():,}"
     elif metric == 'admit_rate':
         # Calculate true national admit rate (total admitted / total applicants)
-        national_admit = (state_data['admitted_total'].sum() / state_data['applicants_total'].sum()) * 100
+        national_admit = (state_data['admissions'].sum() / state_data['applicants'].sum()) * 100
         insight = f"Highest admit rate: {top_state['state']} ({top_state['admit_rate']:.1f}%) | National avg: {national_admit:.1f}%"
     else:
         insight = f"Most institutions: {top_state['state']} ({top_state['num_institutions']})"
