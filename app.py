@@ -58,17 +58,24 @@ app_ui = ui.page_fluid(
                 padding: 0;
             }
             
+            .dashboard-wrapper {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 16px 24px;
+            }
+            
             .dashboard-header {
                 background: linear-gradient(135deg, var(--primary) 0%, #2A4A7A 100%);
                 color: var(--white);
-                padding: 24px 0;
+                padding: 24px 32px;
                 margin-bottom: 0;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                border-radius: 12px 12px 0 0;
             }
             
             .header-content {
-                max-width: 1336px;
-                margin: 0 auto;
+                max-width: 100%;
+                margin: 0;
                 padding: 0;
             }
             
@@ -88,7 +95,7 @@ app_ui = ui.page_fluid(
             
             .filter-panel {
                 background: var(--white);
-                padding: 16px 0;
+                padding: 16px 32px;
                 border-bottom: 1px solid #E0E0E0;
                 position: sticky;
                 top: 0;
@@ -100,8 +107,8 @@ app_ui = ui.page_fluid(
                 flex-wrap: wrap;
                 align-items: center;
                 gap: 24px;
-                max-width: 1336px;
-                margin: 0 auto;
+                max-width: 100%;
+                margin: 0;
                 padding: 0;
             }
             
@@ -142,8 +149,8 @@ app_ui = ui.page_fluid(
             }
             
             .main-content {
-                max-width: 1336px;
-                margin: 0 auto;
+                max-width: 100%;
+                margin: 0;
                 padding: 24px 0;
             }
             
@@ -270,122 +277,125 @@ app_ui = ui.page_fluid(
         """)
     ),
     
-    # Header
-    create_header(),
-    
-    # Filters
-    create_filters(YEARS, INSTITUTIONS),
-    
-    # Main Content
+    # Dashboard Wrapper
     ui.div(
-        # KPI Cards
-        ui.div(
-            ui.div(
-                ui.div("Total Applicants", class_="kpi-label"),
-                ui.div(ui.output_text("kpi_applicants"), class_="kpi-value"),
-                ui.div("across selected filters", class_="kpi-subtext"),
-                class_="kpi-card"
-            ),
-            ui.div(
-                ui.div("Total Admissions", class_="kpi-label"),
-                ui.div(ui.output_text("kpi_admissions"), class_="kpi-value"),
-                ui.div("students admitted", class_="kpi-subtext"),
-                class_="kpi-card"
-            ),
-            ui.div(
-                ui.div("Total Enrolled", class_="kpi-label"),
-                ui.div(ui.output_text("kpi_enrolled"), class_="kpi-value"),
-                ui.div("students enrolled", class_="kpi-subtext"),
-                class_="kpi-card"
-            ),
-            ui.div(
-                ui.div("Average Yield Rate", class_="kpi-label"),
-                ui.div(ui.output_text("kpi_yield"), class_="kpi-value"),
-                ui.div("enrolled / admitted", class_="kpi-subtext"),
-                class_="kpi-card"
-            ),
-            class_="kpi-grid"
-        ),
+        # Header
+        create_header(),
         
-        # Funnel Chart
-        ui.div(
-            ui.div("Enrollment Funnel Overview", class_="section-title"),
-            output_widget("funnel_chart"),
-            class_="chart-section"
-        ),
+        # Filters
+        create_filters(YEARS, INSTITUTIONS),
         
-        # Trends and Demographics Row
+        # Main Content
         ui.div(
+            # KPI Cards
             ui.div(
-                ui.div("Conversion Trends", class_="section-title"),
-                output_widget("trends_chart"),
+                ui.div(
+                    ui.div("Total Applicants", class_="kpi-label"),
+                    ui.div(ui.output_text("kpi_applicants"), class_="kpi-value"),
+                    ui.div("across selected filters", class_="kpi-subtext"),
+                    class_="kpi-card"
+                ),
+                ui.div(
+                    ui.div("Total Admissions", class_="kpi-label"),
+                    ui.div(ui.output_text("kpi_admissions"), class_="kpi-value"),
+                    ui.div("students admitted", class_="kpi-subtext"),
+                    class_="kpi-card"
+                ),
+                ui.div(
+                    ui.div("Total Enrolled", class_="kpi-label"),
+                    ui.div(ui.output_text("kpi_enrolled"), class_="kpi-value"),
+                    ui.div("students enrolled", class_="kpi-subtext"),
+                    class_="kpi-card"
+                ),
+                ui.div(
+                    ui.div("Average Yield Rate", class_="kpi-label"),
+                    ui.div(ui.output_text("kpi_yield"), class_="kpi-value"),
+                    ui.div("enrolled / admitted", class_="kpi-subtext"),
+                    class_="kpi-card"
+                ),
+                class_="kpi-grid"
+            ),
+            
+            # Funnel Chart
+            ui.div(
+                ui.div("Enrollment Funnel Overview", class_="section-title"),
+                output_widget("funnel_chart"),
                 class_="chart-section"
             ),
+            
+            # Trends and Demographics Row
             ui.div(
-                ui.div("Enrollment Demographics", class_="section-title"),
-                output_widget("demographics_chart"),
+                ui.div(
+                    ui.div("Conversion Trends", class_="section-title"),
+                    output_widget("trends_chart"),
+                    class_="chart-section"
+                ),
+                ui.div(
+                    ui.div("Enrollment Demographics", class_="section-title"),
+                    output_widget("demographics_chart"),
+                    class_="chart-section"
+                ),
+                class_="chart-row"
+            ),
+            
+            # Geographic Distribution Map
+            ui.div(
+                ui.div("Geographic Distribution", class_="section-title"),
+                ui.div(
+                    ui.input_radio_buttons(
+                        "map_metric",
+                        None,
+                        choices={
+                            "yield_rate": "Yield Rate",
+                            "enrolled_total": "Total Enrollment",
+                            "num_institutions": "Institutions"
+                        },
+                        selected="yield_rate",
+                        inline=True
+                    ),
+                    class_="comparison-controls"
+                ),
+                output_widget("geographic_map"),
+                ui.p(
+                    "Interactive geospatial analysis for market opportunity insights.",
+                    style="font-size: 12px; color: #666; margin-top: 12px; text-align: center;"
+                ),
                 class_="chart-section"
             ),
-            class_="chart-row"
-        ),
-        
-        # Geographic Distribution Map
-        ui.div(
-            ui.div("Geographic Distribution", class_="section-title"),
+            
+            # Institution Comparison
             ui.div(
-                ui.input_radio_buttons(
-                    "map_metric",
-                    None,
-                    choices={
-                        "yield_rate": "Yield Rate",
-                        "enrolled_total": "Total Enrollment",
-                        "num_institutions": "Institutions"
-                    },
-                    selected="yield_rate",
-                    inline=True
+                ui.div("Institution Benchmarking", class_="section-title"),
+                ui.div(
+                    ui.input_radio_buttons(
+                        "comparison_metric",
+                        None,
+                        choices={
+                            "yield_rate": "By Yield Rate",
+                            "enrolled_total": "By Total Enrollment",
+                            "admit_rate": "By Admit Rate"
+                        },
+                        selected="yield_rate",
+                        inline=True
+                    ),
+                    class_="comparison-controls"
                 ),
-                class_="comparison-controls"
+                output_widget("comparison_chart"),
+                class_="chart-section"
             ),
-            output_widget("geographic_map"),
-            ui.p(
-                "Interactive geospatial analysis for market opportunity insights.",
-                style="font-size: 12px; color: #666; margin-top: 12px; text-align: center;"
-            ),
-            class_="chart-section"
-        ),
-        
-        # Institution Comparison
-        ui.div(
-            ui.div("Institution Benchmarking", class_="section-title"),
+            
+            # Footer
             ui.div(
-                ui.input_radio_buttons(
-                    "comparison_metric",
-                    None,
-                    choices={
-                        "yield_rate": "By Yield Rate",
-                        "enrolled_total": "By Total Enrollment",
-                        "admit_rate": "By Admit Rate"
-                    },
-                    selected="yield_rate",
-                    inline=True
-                ),
-                class_="comparison-controls"
+                ui.HTML("""
+                    <p><strong>Higher Education Enrollment Analytics Dashboard</strong></p>
+                    <p>Data Source: IPEDS (Integrated Postsecondary Education Data System) - U.S. Department of Education</p>
+                    <p>Built by <a href="https://github.com/matheusabrantes" target="_blank">Matheus Abrantes</a> | January 2026</p>
+                """),
+                class_="footer"
             ),
-            output_widget("comparison_chart"),
-            class_="chart-section"
+            class_="main-content"
         ),
-        
-        # Footer
-        ui.div(
-            ui.HTML("""
-                <p><strong>Higher Education Enrollment Analytics Dashboard</strong></p>
-                <p>Data Source: IPEDS (Integrated Postsecondary Education Data System) - U.S. Department of Education</p>
-                <p>Built by <a href="https://github.com/matheusabrantes" target="_blank">Matheus Abrantes</a> | January 2026</p>
-            """),
-            class_="footer"
-        ),
-        
-        class_="main-content"
+        class_="dashboard-wrapper"
     ),
 )
 
