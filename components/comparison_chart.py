@@ -83,7 +83,7 @@ def create_comparison_chart(top_institutions: pd.DataFrame, metric: str = 'yield
     fig.update_layout(
         title=dict(
             text=config['title'],
-            font=dict(size=18, color=CARNEGIE_COLORS['primary']),
+            font=dict(size=16, color=CARNEGIE_COLORS['primary']),
             x=0.5,
             xanchor='center'
         ),
@@ -91,17 +91,18 @@ def create_comparison_chart(top_institutions: pd.DataFrame, metric: str = 'yield
             title=metric.replace('_', ' ').title() + (f" ({config['suffix']})" if config['suffix'] else ""),
             showgrid=True,
             gridcolor='rgba(0,0,0,0.1)',
-            range=[0, 100] if metric == 'yield_rate' or metric == 'admit_rate' else None
+            range=[0, 105] if metric == 'yield_rate' or metric == 'admit_rate' else None,
+            tickfont=dict(size=10)
         ),
         yaxis=dict(
             title="",
-            tickfont=dict(size=11)
+            tickfont=dict(size=10)
         ),
         font=template['layout']['font'],
         paper_bgcolor=template['layout']['paper_bgcolor'],
         plot_bgcolor=template['layout']['plot_bgcolor'],
-        margin=dict(l=200, r=80, t=60, b=100),
-        height=450,
+        margin=dict(l=180, r=60, t=50, b=80),
+        height=400,
         showlegend=False,
         autosize=True
     )

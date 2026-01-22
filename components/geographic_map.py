@@ -102,12 +102,13 @@ def create_state_map(df: pd.DataFrame, metric: str = 'yield_rate') -> go.Figure:
         colorbar=dict(
             title=dict(
                 text=config['colorbar_title'],
-                font=dict(size=12)
+                font=dict(size=10)
             ),
-            thickness=15,
-            len=0.7,
-            x=0.92,
-            tickfont=dict(size=10)
+            thickness=12,
+            len=0.6,
+            x=1.0,
+            xpad=5,
+            tickfont=dict(size=9)
         ),
         marker_line_color='white',
         marker_line_width=1,
@@ -133,8 +134,8 @@ def create_state_map(df: pd.DataFrame, metric: str = 'yield_rate') -> go.Figure:
         ),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        height=450,
-        margin=dict(l=0, r=0, t=50, b=30),
+        height=400,
+        margin=dict(l=0, r=50, t=40, b=50),
         autosize=True
     )
     
