@@ -134,7 +134,8 @@ def create_state_map(df: pd.DataFrame, metric: str = 'yield_rate') -> go.Figure:
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         height=450,
-        margin=dict(l=0, r=0, t=50, b=30)
+        margin=dict(l=0, r=0, t=50, b=30),
+        autosize=True
     )
     
     # Add insight annotation

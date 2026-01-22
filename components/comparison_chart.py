@@ -102,7 +102,8 @@ def create_comparison_chart(top_institutions: pd.DataFrame, metric: str = 'yield
         plot_bgcolor=template['layout']['plot_bgcolor'],
         margin=dict(l=200, r=80, t=60, b=100),
         height=450,
-        showlegend=False
+        showlegend=False,
+        autosize=True
     )
     
     if insight:
