@@ -355,118 +355,130 @@ app_ui = ui.page_fluid(
                 width: 100% !important;
             }
             
-            /* Key Insights Panel Styles */
-            .key-insights-panel {
-                min-height: 400px;
+            /* Key Insights Horizontal Styles */
+            .key-insights-row {
+                margin-bottom: 24px;
             }
             
-            .insights-container {
-                padding: 8px 0;
-            }
-            
-            .insights-header {
-                background: linear-gradient(135deg, var(--primary) 0%, #2A4A7A 100%);
-                color: white;
-                padding: 12px 16px;
+            .insights-container-horizontal {
+                background: var(--white);
                 border-radius: 8px;
-                margin-bottom: 16px;
-                font-size: 13px;
-                font-weight: 600;
+                padding: 12px 16px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            }
+            
+            .insights-header-row {
                 display: flex;
                 align-items: center;
-            }
-            
-            .institution-name-badge {
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            
-            .insight-metric {
-                background: #f8f9fa;
-                border-radius: 8px;
-                padding: 12px 16px;
                 margin-bottom: 12px;
-                border-left: 4px solid var(--primary);
+                padding-bottom: 8px;
+                border-bottom: 1px solid #eee;
             }
             
-            .metric-header {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-bottom: 10px;
+            .insights-title {
+                font-size: 12px;
                 font-weight: 600;
                 color: var(--primary);
-                font-size: 13px;
+                text-transform: uppercase;
             }
             
-            .metric-icon {
-                font-size: 16px;
+            .insights-institution {
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--secondary);
             }
             
-            .rankings-row {
+            .insights-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 16px;
+            }
+            
+            .insight-card {
+                background: #f8f9fa;
+                border-radius: 6px;
+                padding: 10px 12px;
+                border-top: 3px solid var(--primary);
+            }
+            
+            .insight-card-applicants { border-top-color: var(--primary); }
+            .insight-card-admitted { border-top-color: #4A90E2; }
+            .insight-card-enrolled { border-top-color: #50C878; }
+            .insight-card-yield { border-top-color: var(--secondary); }
+            
+            .insight-card-header {
                 display: flex;
-                gap: 8px;
-                flex-wrap: wrap;
+                align-items: center;
+                margin-bottom: 8px;
+                font-weight: 600;
+                font-size: 11px;
+                text-transform: uppercase;
             }
             
-            .rank-badge {
+            .insight-card-applicants .insight-card-header { color: var(--primary); }
+            .insight-card-admitted .insight-card-header { color: #4A90E2; }
+            .insight-card-enrolled .insight-card-header { color: #50C878; }
+            .insight-card-yield .insight-card-header { color: var(--secondary); }
+            
+            .insight-badges {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+            
+            .insight-badge {
                 display: flex;
                 align-items: center;
                 gap: 4px;
-                padding: 6px 10px;
-                border-radius: 6px;
-                font-size: 12px;
-                flex: 1;
-                min-width: 80px;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 11px;
             }
             
-            .rank-badge.national {
+            .insight-badge.national {
                 background: #e3f2fd;
                 color: #1565c0;
             }
             
-            .rank-badge.region {
+            .insight-badge.region {
                 background: #fff3e0;
                 color: #e65100;
             }
             
-            .rank-badge.state {
+            .insight-badge.state {
                 background: #e8f5e9;
                 color: #2e7d32;
             }
             
-            .rank-icon {
+            .badge-icon {
+                font-size: 10px;
+            }
+            
+            .badge-rank {
+                font-weight: 700;
                 font-size: 12px;
             }
             
-            .rank-number {
-                font-weight: 700;
-                font-size: 14px;
-            }
-            
-            .rank-total {
-                font-size: 10px;
+            .badge-total {
+                font-size: 9px;
                 opacity: 0.8;
             }
             
-            .insights-placeholder {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                min-height: 300px;
-                color: #666;
+            .insights-placeholder-horizontal {
+                text-align: center;
+                padding: 12px;
+                background: #f8f9fa;
+                border-radius: 6px;
             }
             
-            .funnel-insights-row {
-                display: grid;
-                grid-template-columns: 1.2fr 0.8fr;
-                gap: 24px;
-                margin-bottom: 24px;
+            @media (max-width: 1000px) {
+                .insights-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
             }
             
-            @media (max-width: 1200px) {
-                .funnel-insights-row {
+            @media (max-width: 600px) {
+                .insights-grid {
                     grid-template-columns: 1fr;
                 }
             }
@@ -512,15 +524,14 @@ app_ui = ui.page_fluid(
                 class_="kpi-grid"
             ),
             
-            # Funnel Chart and Key Insights Row
+            # Key Insights Row (below KPIs)
+            create_key_insights_ui(),
+            
+            # Funnel Chart (full width)
             ui.div(
-                ui.div(
-                    ui.div("Enrollment Funnel Overview", class_="section-title"),
-                    output_widget("funnel_chart"),
-                    class_="chart-section"
-                ),
-                create_key_insights_ui(),
-                class_="funnel-insights-row"
+                ui.div("Enrollment Funnel Overview", class_="section-title"),
+                output_widget("funnel_chart"),
+                class_="chart-section"
             ),
             
             # Trends and Demographics Row
