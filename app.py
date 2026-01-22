@@ -51,6 +51,40 @@ print(f"Loaded {len(DATA)} records for {len(INSTITUTIONS)} institutions across {
 app_ui = ui.page_fluid(
     ui.tags.head(
         ui.tags.link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"),
+        ui.tags.script("""
+            // Force Plotly charts to resize after page load
+            document.addEventListener('DOMContentLoaded', function() {
+                // Wait for Shiny and Plotly to fully initialize
+                setTimeout(function() {
+                    resizePlotlyCharts();
+                }, 1000);
+                
+                // Also resize on window resize
+                window.addEventListener('resize', resizePlotlyCharts);
+            });
+            
+            function resizePlotlyCharts() {
+                var plots = document.querySelectorAll('.js-plotly-plot');
+                plots.forEach(function(plot) {
+                    if (plot && typeof Plotly !== 'undefined') {
+                        Plotly.Plots.resize(plot);
+                    }
+                });
+            }
+            
+            // Observer to catch dynamically added plots
+            var observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes.length) {
+                        setTimeout(resizePlotlyCharts, 500);
+                    }
+                });
+            });
+            
+            document.addEventListener('DOMContentLoaded', function() {
+                observer.observe(document.body, { childList: true, subtree: true });
+            });
+        """),
         ui.tags.style("""
             :root {
                 --primary: #002633;
