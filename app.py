@@ -284,6 +284,18 @@ app_ui = ui.page_fluid(
             .selectize-input {
                 border-radius: 4px !important;
             }
+            
+            /* Force Plotly widgets to fill container width */
+            .chart-section .shiny-html-output,
+            .chart-section .html-widget,
+            .chart-section .plotly,
+            .chart-section .js-plotly-plot {
+                width: 100% !important;
+            }
+            
+            .chart-section .plotly .main-svg {
+                width: 100% !important;
+            }
         """)
     ),
     
