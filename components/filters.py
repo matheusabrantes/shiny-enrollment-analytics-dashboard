@@ -20,21 +20,17 @@ def create_filters(years: list, institutions: list, regions: list,
     
     return ui.div(
         ui.div(
-            # Row 1: Year filter
+            # All filters in one row
             ui.div(
                 ui.input_checkbox_group(
                     "year_filter",
-                    "Select Years",
-                    choices={str(y): f"Fall {y}" for y in years},
+                    "Years",
+                    choices={str(y): str(y) for y in years},
                     selected=[str(y) for y in years],
                     inline=True
                 ),
-                class_="filter-item"
+                class_="filter-item filter-years"
             ),
-            class_="filter-row"
-        ),
-        ui.div(
-            # Row 2: Region/State, Size, and Institution filters
             ui.div(
                 ui.input_selectize(
                     "region_state_filter",
@@ -42,41 +38,39 @@ def create_filters(years: list, institutions: list, regions: list,
                     choices=region_state_choices,
                     selected=[],
                     multiple=True,
-                    options={"placeholder": "All regions and states..."}
+                    options={"placeholder": "All..."}
                 ),
-                class_="filter-item",
-                style="min-width: 200px;"
+                class_="filter-item filter-region"
             ),
             ui.div(
                 ui.input_selectize(
                     "size_filter",
-                    "Institution Size",
+                    "Size",
                     choices={"Small": "Small", "Medium": "Medium", "Large": "Large"},
                     selected=[],
                     multiple=True,
-                    options={"placeholder": "All sizes..."}
+                    options={"placeholder": "All..."}
                 ),
-                class_="filter-item",
-                style="min-width: 150px;"
+                class_="filter-item filter-size"
             ),
             ui.div(
                 ui.input_selectize(
                     "institution_filter",
-                    "Filter Institutions",
+                    "Institution",
                     choices=["All Institutions"] + institutions,
                     selected="All Institutions",
                     multiple=True,
-                    options={"placeholder": "Select institutions..."}
+                    options={"placeholder": "Select..."}
                 ),
                 class_="filter-item filter-institution"
             ),
             ui.div(
                 ui.input_action_button(
                     "reset_filters",
-                    "Reset Filters",
+                    "Reset",
                     class_="btn-reset"
                 ),
-                class_="filter-item"
+                class_="filter-item filter-reset"
             ),
             class_="filter-row"
         ),

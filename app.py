@@ -140,7 +140,7 @@ app_ui = ui.page_fluid(
             
             .filter-panel {
                 background: var(--white);
-                padding: 16px 32px;
+                padding: 12px 32px;
                 border-bottom: 1px solid #E0E0E0;
                 position: sticky;
                 top: 0;
@@ -149,9 +149,9 @@ app_ui = ui.page_fluid(
             
             .filter-row {
                 display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                gap: 24px;
+                flex-wrap: nowrap;
+                align-items: flex-end;
+                gap: 16px;
                 max-width: 100%;
                 margin: 0;
                 padding: 0;
@@ -163,26 +163,49 @@ app_ui = ui.page_fluid(
             }
             
             .filter-item label {
-                font-size: 12px;
+                font-size: 11px;
                 font-weight: 600;
                 color: var(--primary);
                 margin-bottom: 4px;
                 text-transform: uppercase;
-                letter-spacing: 0.5px;
+                letter-spacing: 0.3px;
+            }
+            
+            .filter-years {
+                flex-shrink: 0;
+            }
+            
+            .filter-years .shiny-input-checkboxgroup label.checkbox-inline {
+                margin-right: 8px;
+                font-size: 12px;
+            }
+            
+            .filter-region {
+                width: 160px;
+                min-width: 160px;
+            }
+            
+            .filter-size {
+                width: 120px;
+                min-width: 120px;
             }
             
             .filter-institution {
                 flex: 1;
-                min-width: 300px;
+                min-width: 200px;
+            }
+            
+            .filter-reset {
+                flex-shrink: 0;
             }
             
             .btn-reset {
                 background: var(--neutral-light);
                 border: 1px solid #DDD;
                 color: var(--neutral-dark);
-                padding: 8px 16px;
+                padding: 6px 12px;
                 border-radius: 4px;
-                font-size: 13px;
+                font-size: 12px;
                 cursor: pointer;
                 transition: all 0.2s;
             }
