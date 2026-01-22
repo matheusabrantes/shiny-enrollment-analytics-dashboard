@@ -360,50 +360,47 @@ app_ui = ui.page_fluid(
                 class_="chart-row"
             ),
             
-            # Geographic Distribution Map
+            # Geographic Distribution and Institution Benchmarking Row
             ui.div(
-                ui.div("Geographic Distribution", class_="section-title"),
                 ui.div(
-                    ui.input_radio_buttons(
-                        "map_metric",
-                        None,
-                        choices={
-                            "yield_rate": "Yield Rate",
-                            "enrolled_total": "Total Enrollment",
-                            "num_institutions": "Institutions"
-                        },
-                        selected="yield_rate",
-                        inline=True
+                    ui.div("Geographic Distribution", class_="section-title"),
+                    ui.div(
+                        ui.input_radio_buttons(
+                            "map_metric",
+                            None,
+                            choices={
+                                "yield_rate": "Yield Rate",
+                                "enrolled_total": "Total Enrollment",
+                                "num_institutions": "Institutions"
+                            },
+                            selected="yield_rate",
+                            inline=True
+                        ),
+                        class_="comparison-controls"
                     ),
-                    class_="comparison-controls"
+                    output_widget("geographic_map"),
+                    class_="chart-section"
                 ),
-                output_widget("geographic_map"),
-                ui.p(
-                    "Interactive geospatial analysis for market opportunity insights.",
-                    style="font-size: 12px; color: #666; margin-top: 12px; text-align: center;"
-                ),
-                class_="chart-section"
-            ),
-            
-            # Institution Comparison
-            ui.div(
-                ui.div("Institution Benchmarking", class_="section-title"),
                 ui.div(
-                    ui.input_radio_buttons(
-                        "comparison_metric",
-                        None,
-                        choices={
-                            "yield_rate": "By Yield Rate",
-                            "enrolled_total": "By Total Enrollment",
-                            "admit_rate": "By Admit Rate"
-                        },
-                        selected="yield_rate",
-                        inline=True
+                    ui.div("Institution Benchmarking", class_="section-title"),
+                    ui.div(
+                        ui.input_radio_buttons(
+                            "comparison_metric",
+                            None,
+                            choices={
+                                "yield_rate": "By Yield Rate",
+                                "enrolled_total": "By Total Enrollment",
+                                "admit_rate": "By Admit Rate"
+                            },
+                            selected="yield_rate",
+                            inline=True
+                        ),
+                        class_="comparison-controls"
                     ),
-                    class_="comparison-controls"
+                    output_widget("comparison_chart"),
+                    class_="chart-section"
                 ),
-                output_widget("comparison_chart"),
-                class_="chart-section"
+                class_="chart-row"
             ),
             
             # Footer
