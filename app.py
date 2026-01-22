@@ -34,6 +34,7 @@ from components.trends_chart import create_trends_chart
 from components.demographics_chart import create_demographics_chart
 from components.comparison_chart import create_comparison_chart
 from components.geographic_map import create_state_map
+from components.key_insights import create_key_insights_ui, render_key_insights, calculate_rankings
 
 
 # Load data at startup
@@ -330,6 +331,122 @@ app_ui = ui.page_fluid(
             .chart-section .plotly .main-svg {
                 width: 100% !important;
             }
+            
+            /* Key Insights Panel Styles */
+            .key-insights-panel {
+                min-height: 400px;
+            }
+            
+            .insights-container {
+                padding: 8px 0;
+            }
+            
+            .insights-header {
+                background: linear-gradient(135deg, var(--primary) 0%, #2A4A7A 100%);
+                color: white;
+                padding: 12px 16px;
+                border-radius: 8px;
+                margin-bottom: 16px;
+                font-size: 13px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+            }
+            
+            .institution-name-badge {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .insight-metric {
+                background: #f8f9fa;
+                border-radius: 8px;
+                padding: 12px 16px;
+                margin-bottom: 12px;
+                border-left: 4px solid var(--primary);
+            }
+            
+            .metric-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 10px;
+                font-weight: 600;
+                color: var(--primary);
+                font-size: 13px;
+            }
+            
+            .metric-icon {
+                font-size: 16px;
+            }
+            
+            .rankings-row {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            
+            .rank-badge {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                padding: 6px 10px;
+                border-radius: 6px;
+                font-size: 12px;
+                flex: 1;
+                min-width: 80px;
+            }
+            
+            .rank-badge.national {
+                background: #e3f2fd;
+                color: #1565c0;
+            }
+            
+            .rank-badge.region {
+                background: #fff3e0;
+                color: #e65100;
+            }
+            
+            .rank-badge.state {
+                background: #e8f5e9;
+                color: #2e7d32;
+            }
+            
+            .rank-icon {
+                font-size: 12px;
+            }
+            
+            .rank-number {
+                font-weight: 700;
+                font-size: 14px;
+            }
+            
+            .rank-total {
+                font-size: 10px;
+                opacity: 0.8;
+            }
+            
+            .insights-placeholder {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 300px;
+                color: #666;
+            }
+            
+            .funnel-insights-row {
+                display: grid;
+                grid-template-columns: 1.2fr 0.8fr;
+                gap: 24px;
+                margin-bottom: 24px;
+            }
+            
+            @media (max-width: 1200px) {
+                .funnel-insights-row {
+                    grid-template-columns: 1fr;
+                }
+            }
         """)
     ),
     
@@ -372,11 +489,15 @@ app_ui = ui.page_fluid(
                 class_="kpi-grid"
             ),
             
-            # Funnel Chart
+            # Funnel Chart and Key Insights Row
             ui.div(
-                ui.div("Enrollment Funnel Overview", class_="section-title"),
-                output_widget("funnel_chart"),
-                class_="chart-section"
+                ui.div(
+                    ui.div("Enrollment Funnel Overview", class_="section-title"),
+                    output_widget("funnel_chart"),
+                    class_="chart-section"
+                ),
+                create_key_insights_ui(),
+                class_="funnel-insights-row"
             ),
             
             # Trends and Demographics Row
@@ -556,6 +677,32 @@ def server(input, output, session):
         metric = input.comparison_metric()
         top_df = get_top_institutions(filtered_data(), metric=metric, n=10)
         return create_comparison_chart(top_df, metric=metric)
+    
+    @render.ui
+    def key_insights_content():
+        """Render Key Insights panel with institution rankings."""
+        selected_institutions = input.institution_filter()
+        
+        # Check if exactly one institution is selected
+        if not selected_institutions or "All Institutions" in selected_institutions:
+            return render_key_insights({}, None)
+        
+        if len(selected_institutions) != 1:
+            return render_key_insights({}, None)
+        
+        institution_name = selected_institutions[0]
+        
+        # Get the latest year from selected years
+        selected_years = input.year_filter()
+        if selected_years:
+            year = max(int(y) for y in selected_years)
+        else:
+            year = DATA['year'].max()
+        
+        # Calculate rankings using full dataset (not filtered)
+        rankings = calculate_rankings(DATA, institution_name, year)
+        
+        return render_key_insights(rankings, institution_name)
 
 
 # Create app
