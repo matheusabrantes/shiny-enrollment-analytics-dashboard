@@ -60,13 +60,13 @@ def render_key_insights(rankings: dict, institution_name: str) -> ui.TagList:
                 ui.div(
                     ui.span("📍", class_="rank-icon"),
                     ui.span(f"#{region_rank}", class_="rank-number"),
-                    ui.span(f"in {region_name}", class_="rank-total"),
+                    ui.span(f"of {region_total} ({region_name})", class_="rank-total"),
                     class_="rank-badge region"
                 ),
                 ui.div(
                     ui.span("🏛️", class_="rank-icon"),
                     ui.span(f"#{state_rank}", class_="rank-number"),
-                    ui.span(f"in {state_name}", class_="rank-total"),
+                    ui.span(f"of {state_total} ({state_name})", class_="rank-total"),
                     class_="rank-badge state"
                 ),
                 class_="rankings-row"
