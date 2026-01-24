@@ -176,7 +176,7 @@ app_ui = ui.page_fluid(
                 font-size: 12px;
                 cursor: pointer;
                 transition: all 0.2s;
-                height: 38px;  /* Match height of select inputs */
+                height: 36px;  /* Match height of select inputs */
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -624,8 +624,8 @@ app_ui = ui.page_fluid(
             
             /* Reset button alignment - must match dropdown height exactly */
             .filter-group .btn-reset {
-                height: 34px;
-                line-height: 34px;
+                height: 36px;
+                line-height: 36px;
                 padding: 0 16px;
                 margin-bottom: 0;
             }

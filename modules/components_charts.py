@@ -82,10 +82,10 @@ def create_funnel_chart(
     
     # Add annotations for conversion rates - aligned in a clean vertical column
     # Font sizes reduced by 20% for better balance
-    # All labels aligned at x=0.78 (left-aligned) within the annotation area
+    # All labels aligned at x=0.66 (left-aligned) within the annotation area
     annotations = [
         dict(
-            x=0.78, y=0.72,
+            x=0.66, y=0.72,
             text=f"<b>Selection Rate</b><br>{admit_rate:.1f}%",
             showarrow=False,
             font=dict(size=14, color=COLORS['primary']),
@@ -94,7 +94,7 @@ def create_funnel_chart(
             xanchor='left'
         ),
         dict(
-            x=0.78, y=0.32,
+            x=0.66, y=0.32,
             text=f"<b>Yield Rate</b><br>{yield_rate:.1f}%",
             showarrow=False,
             font=dict(size=14, color=COLORS['primary']),
@@ -107,7 +107,7 @@ def create_funnel_chart(
     if show_leakage:
         annotations.extend([
             dict(
-                x=0.78, y=0.52,
+                x=0.66, y=0.52,
                 text=f"▼ {leakage1:,.0f} not admitted",
                 showarrow=False,
                 font=dict(size=13, color=COLORS['danger']),
@@ -116,7 +116,7 @@ def create_funnel_chart(
                 xanchor='left'
             ),
             dict(
-                x=0.78, y=0.12,
+                x=0.66, y=0.12,
                 text=f"▼ {leakage2:,.0f} did not enroll",
                 showarrow=False,
                 font=dict(size=13, color=COLORS['danger']),
