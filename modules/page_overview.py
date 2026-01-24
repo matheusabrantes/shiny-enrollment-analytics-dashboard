@@ -109,8 +109,7 @@ def overview_ui():
                         ),
                         class_="chart-controls"
                     ),
-                    class_="card-header",
-                    style="flex-wrap: wrap;"
+                    class_="card-header"
                 ),
                 ui.div(
                     output_widget("overview_map"),
@@ -135,8 +134,7 @@ def overview_ui():
                         ),
                         class_="chart-controls"
                     ),
-                    class_="card-header",
-                    style="flex-wrap: wrap;"
+                    class_="card-header"
                 ),
                 ui.div(
                     output_widget("overview_ranking_chart"),

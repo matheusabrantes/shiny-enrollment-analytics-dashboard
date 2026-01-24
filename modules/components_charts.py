@@ -80,22 +80,23 @@ def create_funnel_chart(
     # Constrain funnel to left 60% of chart area to leave space for annotations
     fig.update_xaxes(domain=[0, 0.6])
     
-    # Add annotations for conversion rates
+    # Add annotations for conversion rates - positioned with consistent alignment
+    # Font sizes doubled for better readability
     annotations = [
         dict(
-            x=0.85, y=0.75,
+            x=0.72, y=0.78,
             text=f"<b>Selection Rate</b><br>{admit_rate:.1f}%",
             showarrow=False,
-            font=dict(size=11, color=COLORS['muted']),
-            align='left',
+            font=dict(size=18, color=COLORS['primary']),
+            align='center',
             xref='paper', yref='paper'
         ),
         dict(
-            x=0.85, y=0.35,
+            x=0.72, y=0.28,
             text=f"<b>Yield Rate</b><br>{yield_rate:.1f}%",
             showarrow=False,
-            font=dict(size=11, color=COLORS['muted']),
-            align='left',
+            font=dict(size=18, color=COLORS['primary']),
+            align='center',
             xref='paper', yref='paper'
         ),
     ]
@@ -103,19 +104,19 @@ def create_funnel_chart(
     if show_leakage:
         annotations.extend([
             dict(
-                x=0.85, y=0.55,
+                x=0.72, y=0.58,
                 text=f"<span style='color:{COLORS['danger']}'>▼ {leakage1:,.0f} not admitted</span>",
                 showarrow=False,
-                font=dict(size=10),
-                align='left',
+                font=dict(size=16, color=COLORS['danger']),
+                align='center',
                 xref='paper', yref='paper'
             ),
             dict(
-                x=0.85, y=0.15,
+                x=0.72, y=0.08,
                 text=f"<span style='color:{COLORS['danger']}'>▼ {leakage2:,.0f} did not enroll</span>",
                 showarrow=False,
-                font=dict(size=10),
-                align='left',
+                font=dict(size=16, color=COLORS['danger']),
+                align='center',
                 xref='paper', yref='paper'
             ),
         ])
@@ -661,17 +662,24 @@ def create_comparison_bar_chart(
         hovertemplate="<b>%{y}</b><br>" + f"{metric_label or metric}: %{{x:.1f}}<extra></extra>"
     ))
     
+    # Calculate x-axis range with padding for outside labels
+    max_val = sorted_df[metric].max() if not sorted_df.empty else 100
+    x_padding = max_val * 0.25  # 25% padding for labels
+    
     fig.update_layout(
         **LAYOUT_DEFAULTS,
         title=None,
-        xaxis=dict(title=metric_label or metric),
+        xaxis=dict(
+            title=metric_label or metric,
+            range=[0, max_val + x_padding],  # Extended range for outside labels
+        ),
         yaxis=dict(
             title=None,
             autorange='reversed',
             tickfont=dict(size=11)
         ),
         height=max(300, n * 35),
-        margin={'l': 200, 'r': 100, 't': 20, 'b': 50},  # Wider right margin for bar labels
+        margin={'l': 200, 'r': 40, 't': 20, 'b': 50},
     )
     
     return fig

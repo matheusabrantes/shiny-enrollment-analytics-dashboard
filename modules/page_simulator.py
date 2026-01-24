@@ -22,9 +22,10 @@ def simulator_ui():
                 ui.tags.button(
                     "📄 Export PDF",
                     onclick="exportPageAsPDF()",
-                    class_="btn-export-pdf"
+                    class_="btn-export-pdf",
+                    style="margin-left: auto;"
                 ),
-                style="display: flex; justify-content: space-between; align-items: center;"
+                style="display: flex; justify-content: space-between; align-items: center; gap: 24px;"
             ),
             ui.p("Project enrollment outcomes based on changes to funnel metrics", 
                  class_="section-subtitle"),
@@ -466,19 +467,19 @@ def simulator_server(input, output, session, filtered_data, full_data,
             textposition='outside',
         ))
         
-        # Calculate y-axis max to accommodate labels above bars
-        max_val = max(max(base_values), max(proj_values)) * 1.15
+        # Calculate y-axis max to accommodate labels above bars - increased padding
+        max_val = max(max(base_values), max(proj_values)) * 1.30  # 30% padding for labels
         
         fig.update_layout(
             font={'family': 'Inter, sans-serif', 'size': 12},
             paper_bgcolor='#FFFFFF',
             plot_bgcolor='#FFFFFF',
-            margin={'l': 50, 'r': 30, 't': 80, 'b': 50},  # Increased top margin for labels
+            margin={'l': 60, 'r': 40, 't': 100, 'b': 50},  # Increased margins for labels
             barmode='group',
             legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='left', x=0),
             xaxis=dict(title=None),
-            yaxis=dict(title='Count', gridcolor='#E2E8F0', range=[0, max_val]),  # Explicit range for labels
-            height=360,  # Taller to accommodate labels
+            yaxis=dict(title='Count', gridcolor='#E2E8F0', range=[0, max_val]),
+            height=400,  # Taller to accommodate labels
         )
         
         return fig

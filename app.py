@@ -294,27 +294,35 @@ app_ui = ui.page_fluid(
                 align-items: center;
                 padding: 16px 20px;
                 border-bottom: 1px solid #E0E0E0;
-                flex-wrap: wrap;
-                gap: 8px;
+                flex-wrap: nowrap;
+                gap: 16px;
             }
             
-            /* Ensure chart controls align horizontally with title */
+            /* Ensure chart controls align horizontally with title on same line */
             .card-header .chart-controls {
-                display: flex;
+                display: inline-flex;
                 align-items: center;
                 gap: 4px;
+                flex-shrink: 0;
             }
             
             .card-header .chart-controls .shiny-input-radiogroup {
-                display: flex;
+                display: inline-flex !important;
                 align-items: center;
+                margin: 0 !important;
             }
             
             .card-header .chart-controls .shiny-options-group {
-                display: flex;
-                flex-direction: row;
+                display: inline-flex !important;
+                flex-direction: row !important;
                 align-items: center;
                 gap: 12px;
+                flex-wrap: nowrap;
+            }
+            
+            .card-header .chart-controls .shiny-options-group label {
+                margin: 0 !important;
+                white-space: nowrap;
             }
             
             .card-title {
@@ -594,7 +602,24 @@ app_ui = ui.page_fluid(
             }
             
             .filter-group.filter-institution {
-                min-width: 220px;
+                min-width: 200px;
+                max-width: 220px;
+            }
+            
+            /* Reduce dropdown widths and align Reset button */
+            .filter-group .selectize-control {
+                min-width: 140px;
+            }
+            
+            .filter-row .filter-group {
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+            }
+            
+            .filter-row .filter-group:last-child {
+                align-self: flex-end;
+                padding-bottom: 0;
             }
             
             /* KPI card title height fix for Simulator */
@@ -729,6 +754,30 @@ app_ui = ui.page_fluid(
                 // Restore original title
                 document.title = originalTitle;
             }
+            
+            // Prevent client-side errors during page transitions
+            // Wrap Shiny's setInputValue to handle undefined targets gracefully
+            (function() {
+                var originalSetInputValue = Shiny.setInputValue;
+                if (originalSetInputValue) {
+                    Shiny.setInputValue = function(name, value, opts) {
+                        try {
+                            return originalSetInputValue.call(Shiny, name, value, opts);
+                        } catch (e) {
+                            console.warn('Shiny setInputValue error caught:', e.message);
+                        }
+                    };
+                }
+            })();
+            
+            // Handle Plotly resize errors gracefully during page transitions
+            window.addEventListener('error', function(e) {
+                if (e.message && e.message.includes('Cannot set properties of undefined')) {
+                    e.preventDefault();
+                    console.warn('Plotly transition error suppressed');
+                    return true;
+                }
+            });
         """),
     ),
     

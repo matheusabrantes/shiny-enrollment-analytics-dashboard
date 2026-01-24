@@ -624,7 +624,8 @@ def profile_server(input, output, session, filtered_data, full_data,
         basket = compare_basket.get()
         df = full_data()
         year = latest_year()
-        inst_list = institutions_list()
+        # institutions_list is passed as a plain list, not a reactive
+        inst_list = institutions_list if isinstance(institutions_list, list) else institutions_list()
         
         # Get current institution to auto-include
         current_inst = selected_institution()

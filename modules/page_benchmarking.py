@@ -287,6 +287,11 @@ def benchmarking_server(input, output, session, filtered_data, full_data,
                 peers = year_data
         elif peer_type == 'top_n_applicants':
             peers = year_data.nlargest(n, 'applicants')
+            # Ensure target institution is included for ranking purposes
+            if target and target not in peers['institution_name'].values:
+                target_row = year_data[year_data['institution_name'] == target]
+                if not target_row.empty:
+                    peers = pd.concat([peers, target_row], ignore_index=True)
         elif peer_type == 'similar' and similar_df is not None and not similar_df.empty:
             similar_names = similar_df['institution_name'].tolist()
             if target:
