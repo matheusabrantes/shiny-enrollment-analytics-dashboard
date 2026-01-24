@@ -15,9 +15,17 @@ from utils.data_model import simulate_enrollment, calculate_goal_recommendations
 def simulator_ui():
     """Create the Simulator page UI."""
     return ui.div(
-        # Page header
+        # Page header with Export PDF button
         ui.div(
-            ui.h2("Scenario Simulator", class_="section-title", style="margin: 0;"),
+            ui.div(
+                ui.h2("Scenario Simulator", class_="section-title", style="margin: 0;"),
+                ui.tags.button(
+                    "📄 Export PDF",
+                    onclick="exportPageAsPDF()",
+                    class_="btn-export-pdf"
+                ),
+                style="display: flex; justify-content: space-between; align-items: center;"
+            ),
             ui.p("Project enrollment outcomes based on changes to funnel metrics", 
                  class_="section-subtitle"),
             class_="section-header",
@@ -458,16 +466,19 @@ def simulator_server(input, output, session, filtered_data, full_data,
             textposition='outside',
         ))
         
+        # Calculate y-axis max to accommodate labels above bars
+        max_val = max(max(base_values), max(proj_values)) * 1.15
+        
         fig.update_layout(
             font={'family': 'Inter, sans-serif', 'size': 12},
             paper_bgcolor='#FFFFFF',
             plot_bgcolor='#FFFFFF',
-            margin={'l': 50, 'r': 30, 't': 60, 'b': 50},  # Increased top margin for labels
+            margin={'l': 50, 'r': 30, 't': 80, 'b': 50},  # Increased top margin for labels
             barmode='group',
             legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='left', x=0),
             xaxis=dict(title=None),
-            yaxis=dict(title='Count', gridcolor='#E2E8F0'),
-            height=320,  # Slightly taller to accommodate labels
+            yaxis=dict(title='Count', gridcolor='#E2E8F0', range=[0, max_val]),  # Explicit range for labels
+            height=360,  # Taller to accommodate labels
         )
         
         return fig

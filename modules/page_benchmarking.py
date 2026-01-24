@@ -100,6 +100,17 @@ def benchmarking_ui():
         
         # Main content area
         ui.div(
+            # Page header with Export PDF button
+            ui.div(
+                ui.h2("Institutional Benchmarking", class_="section-title", style="margin: 0;"),
+                ui.tags.button(
+                    "📄 Export PDF",
+                    onclick="exportPageAsPDF()",
+                    class_="btn-export-pdf"
+                ),
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"
+            ),
+            
             # Benchmark KPI Cards
             ui.output_ui("bench_kpi_cards"),
             

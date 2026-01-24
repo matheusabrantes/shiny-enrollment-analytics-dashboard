@@ -30,6 +30,16 @@ from utils.metrics import (
 def profile_ui():
     """Create the Institution Profile page UI."""
     return ui.div(
+        # Page header with Export PDF button
+        ui.div(
+            ui.tags.button(
+                "📄 Export PDF",
+                onclick="exportPageAsPDF()",
+                class_="btn-export-pdf"
+            ),
+            style="display: flex; justify-content: flex-end; margin-bottom: 12px;"
+        ),
+        
         # Hero Section
         ui.output_ui("profile_hero"),
         
@@ -135,15 +145,7 @@ def profile_server(input, output, session, filtered_data, full_data,
         return ui.div(
             ui.h1(inst, class_="hero-title"),
             ui.p(f"{state} • {region} Region • {size} Institution", class_="hero-subtitle"),
-            ui.div(
-                ui.input_action_button(
-                    "profile_add_compare",
-                    "➕ Add to Compare",
-                    class_="hero-btn"
-                ),
-                # Share Link button removed as it had no functionality
-                class_="hero-actions"
-            ),
+            # Removed Add to Compare button - comparison now managed in Compare Basket section below
             class_="hero-section"
         )
     
@@ -616,39 +618,82 @@ def profile_server(input, output, session, filtered_data, full_data,
             }
         )
     
-    # Compare Section
+    # Compare Section - always visible with multi-select for adding institutions
     @render.ui
     def profile_compare_section():
         basket = compare_basket.get()
-        if not basket:
-            return ui.div()
-        
         df = full_data()
         year = latest_year()
+        inst_list = institutions_list()
+        
+        # Get current institution to auto-include
+        current_inst = selected_institution()
         
         return ui.div(
             ui.div(
-                ui.h3(f"Compare Basket ({len(basket)}/5)", class_="card-title"),
+                ui.h3(f"Compare Institutions ({len(basket)}/5)", class_="card-title"),
                 ui.input_action_button(
                     "profile_clear_compare",
                     "Clear All",
                     class_="btn btn-secondary btn-sm"
-                ),
+                ) if basket else ui.span(),
                 class_="card-header"
             ),
             ui.div(
+                # Multi-select dropdown for adding institutions
                 ui.div(
-                    *[ui.span(inst[:25] + "..." if len(inst) > 25 else inst, 
-                              class_="badge badge-info", style="margin-right: 8px; margin-bottom: 4px;")
-                      for inst in basket],
-                    style="margin-bottom: 16px;"
+                    ui.div("Add institutions to compare:", class_="filter-label"),
+                    ui.input_selectize(
+                        "profile_compare_select",
+                        None,
+                        choices=[""] + inst_list,
+                        selected="",
+                        multiple=False,
+                        options={"placeholder": "Search and select institution..."}
+                    ),
+                    class_="filter-group",
+                    style="margin-bottom: 16px; max-width: 400px;"
                 ),
-                create_comparison_table(basket, df, year) if len(basket) > 1 else 
-                    ui.p("Add more institutions to compare", style="color: var(--color-text-muted);"),
+                # Selected institutions badges
+                ui.div(
+                    *[ui.span(
+                        inst[:25] + "..." if len(inst) > 25 else inst,
+                        ui.tags.button("×", 
+                            onclick=f"Shiny.setInputValue('profile_remove_inst', '{inst}', {{priority: 'event'}})",
+                            style="background: none; border: none; color: inherit; cursor: pointer; margin-left: 4px; font-weight: bold;"
+                        ),
+                        class_="badge badge-info", 
+                        style="margin-right: 8px; margin-bottom: 4px; display: inline-flex; align-items: center;"
+                    ) for inst in basket],
+                    style="margin-bottom: 16px;"
+                ) if basket else ui.p("No institutions selected for comparison", style="color: var(--color-text-muted);"),
+                # Comparison table
+                create_comparison_table(basket, df, year) if len(basket) >= 2 else 
+                    ui.p("Select at least 2 institutions to see comparison table", style="color: var(--color-text-muted); font-style: italic;") if basket else ui.span(),
                 class_="card-body"
             ),
             class_="card chart-section"
         )
+    
+    # Add institution to compare basket when selected
+    @reactive.effect
+    @reactive.event(input.profile_compare_select)
+    def add_to_compare_from_select():
+        inst = input.profile_compare_select()
+        if inst and inst != "":
+            current = compare_basket.get()
+            if inst not in current and len(current) < 5:
+                compare_basket.set(current + [inst])
+    
+    # Remove institution from compare basket
+    @reactive.effect
+    @reactive.event(input.profile_remove_inst)
+    def remove_from_compare():
+        inst = input.profile_remove_inst()
+        if inst:
+            current = compare_basket.get()
+            if inst in current:
+                compare_basket.set([i for i in current if i != inst])
     
     # Clear compare basket
     @reactive.effect

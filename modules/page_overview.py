@@ -25,7 +25,15 @@ def overview_ui():
     return ui.div(
         # Page header with insights directly below title
         ui.div(
-            ui.h2("Executive Overview", class_="section-title", style="margin: 0;"),
+            ui.div(
+                ui.h2("Executive Overview", class_="section-title", style="margin: 0;"),
+                ui.tags.button(
+                    "📄 Export PDF",
+                    onclick="exportPageAsPDF()",
+                    class_="btn-export-pdf"
+                ),
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;"
+            ),
             ui.p("Comprehensive view of enrollment funnel metrics across selected institutions", 
                  class_="section-subtitle"),
             # Insights panel directly under title for better visibility

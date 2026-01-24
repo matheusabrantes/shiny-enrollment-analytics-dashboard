@@ -61,7 +61,7 @@ def create_funnel_chart(
     
     fig = go.Figure()
     
-    # Main funnel - constrained width to ~70% to avoid annotation overlap
+    # Main funnel - constrained to ~60% width via domain to avoid annotation overlap
     fig.add_trace(go.Funnel(
         y=['Applicants', 'Admitted', 'Enrolled'],
         x=[applicants, admitted, enrolled],
@@ -76,6 +76,9 @@ def create_funnel_chart(
         hovertemplate='<b>%{y}</b><br>Count: %{x:,.0f}<br>%{percentInitial:.1%} of applicants<extra></extra>',
         constraintext='both',
     ))
+    
+    # Constrain funnel to left 60% of chart area to leave space for annotations
+    fig.update_xaxes(domain=[0, 0.6])
     
     # Add annotations for conversion rates
     annotations = [
@@ -416,36 +419,37 @@ def create_scatter_chart(
         )
         return fig
     
-    # Prepare size values
+    # Prepare size values - ensure we convert to list for proper indexing
     if size_col and size_col in df.columns:
-        sizes = df[size_col].fillna(df[size_col].median())
+        sizes = df[size_col].fillna(df[size_col].median() if not df[size_col].isna().all() else 10)
         # Normalize sizes
         size_min, size_max = sizes.min(), sizes.max()
         if size_max > size_min:
-            normalized_sizes = 8 + (sizes - size_min) / (size_max - size_min) * 20
+            normalized_sizes = (8 + (sizes - size_min) / (size_max - size_min) * 20).tolist()
         else:
             normalized_sizes = [12] * len(sizes)
     else:
         normalized_sizes = [10] * len(df)
     
-    # Color mapping
+    # Color mapping - ensure we convert to list for proper indexing
     if color_col and color_col in df.columns:
-        unique_colors = df[color_col].unique()
+        unique_colors = df[color_col].dropna().unique()
         color_map = {val: CHART_PALETTE[i % len(CHART_PALETTE)] for i, val in enumerate(unique_colors)}
-        colors = df[color_col].map(color_map)
+        colors = df[color_col].map(lambda x: color_map.get(x, COLORS['accent'])).tolist()
     else:
         colors = [COLORS['accent']] * len(df)
     
-    # Non-target points
-    if target_institution:
+    # Non-target points - use reset index for reliable iteration
+    df = df.reset_index(drop=True)
+    if target_institution and 'institution_name' in df.columns:
         mask = df['institution_name'] != target_institution
-        other_df = df[mask]
+        other_df = df[mask].copy()
         other_sizes = [normalized_sizes[i] for i in range(len(df)) if mask.iloc[i]]
-        other_colors = [colors.iloc[i] for i in range(len(df)) if mask.iloc[i]]
+        other_colors = [colors[i] for i in range(len(df)) if mask.iloc[i]]
     else:
-        other_df = df
-        other_sizes = list(normalized_sizes)
-        other_colors = list(colors)
+        other_df = df.copy()
+        other_sizes = normalized_sizes
+        other_colors = colors
     
     fig.add_trace(go.Scatter(
         x=other_df[x_col],
@@ -535,14 +539,21 @@ def create_waterfall_chart(
         totals={'marker': {'color': COLORS['accent']}},
     ))
     
+    # Calculate y-axis range to accommodate labels above bars
+    all_values = [base_enrolled, base_enrolled + effect_applicants, 
+                  base_enrolled + effect_applicants + effect_admit_rate,
+                  base_enrolled + effect_applicants + effect_admit_rate + effect_yield, 
+                  final_enrolled]
+    max_val = max(all_values) * 1.15  # Add 15% padding for labels
+    
     fig.update_layout(
         **LAYOUT_DEFAULTS,
-        margin={'l': 50, 'r': 30, 't': 70, 'b': 50},  # Increased top margin for text labels
+        margin={'l': 50, 'r': 30, 't': 80, 'b': 50},  # Increased top margin for text labels
         title=None,
         showlegend=False,
         xaxis=dict(title=None),
-        yaxis=dict(title='Enrolled Students'),
-        height=380,  # Slightly taller to accommodate labels
+        yaxis=dict(title='Enrolled Students', range=[0, max_val]),  # Set explicit range
+        height=400,  # Taller to accommodate labels
     )
     
     return fig
@@ -660,7 +671,7 @@ def create_comparison_bar_chart(
             tickfont=dict(size=11)
         ),
         height=max(300, n * 35),
-        margin={'l': 200, 'r': 50, 't': 20, 'b': 50},  # Bar chart needs wider left margin
+        margin={'l': 200, 'r': 100, 't': 20, 'b': 50},  # Wider right margin for bar labels
     )
     
     return fig

@@ -107,27 +107,33 @@ app_ui = ui.page_fluid(
                 gap: 8px;
             }
             
-            .nav-link {
-                background: transparent;
-                border: 1px solid rgba(255,255,255,0.3);
-                color: rgba(255,255,255,0.7);  /* Non-selected: light gray */
-                padding: 8px 16px;
-                border-radius: 6px;
-                font-size: 13px;
+            .nav-link,
+            .navbar-nav .btn.nav-link,
+            .navbar-nav button.nav-link {
+                background: transparent !important;
+                border: 1px solid rgba(255,255,255,0.3) !important;
+                color: rgba(255,255,255,0.7) !important;  /* Non-selected: light gray */
+                padding: 8px 16px !important;
+                border-radius: 6px !important;
+                font-size: 13px !important;
                 cursor: pointer;
                 transition: all 0.2s;
             }
             
-            .nav-link:hover {
-                background: rgba(255,255,255,0.1);
-                color: var(--white);
+            .nav-link:hover,
+            .navbar-nav .btn.nav-link:hover,
+            .navbar-nav button.nav-link:hover {
+                background: rgba(255,255,255,0.1) !important;
+                color: #FFFFFF !important;
             }
             
-            .nav-link.active {
-                background: rgba(255,255,255,0.2);
-                border-color: var(--white);
-                color: var(--white);  /* Active: white text */
-                font-weight: 600;
+            .nav-link.active,
+            .navbar-nav .btn.nav-link.active,
+            .navbar-nav button.nav-link.active {
+                background: rgba(255,255,255,0.25) !important;
+                border-color: #FFFFFF !important;
+                color: #FFFFFF !important;  /* Active: white text */
+                font-weight: 600 !important;
             }
             
             /* Filter Panel */
@@ -170,6 +176,10 @@ app_ui = ui.page_fluid(
                 font-size: 12px;
                 cursor: pointer;
                 transition: all 0.2s;
+                height: 38px;  /* Match height of select inputs */
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
             }
             
             .btn-reset:hover {
@@ -284,6 +294,27 @@ app_ui = ui.page_fluid(
                 align-items: center;
                 padding: 16px 20px;
                 border-bottom: 1px solid #E0E0E0;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            /* Ensure chart controls align horizontally with title */
+            .card-header .chart-controls {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+            
+            .card-header .chart-controls .shiny-input-radiogroup {
+                display: flex;
+                align-items: center;
+            }
+            
+            .card-header .chart-controls .shiny-options-group {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 12px;
             }
             
             .card-title {
@@ -585,6 +616,53 @@ app_ui = ui.page_fluid(
             .card-body .js-plotly-plot {
                 width: 100% !important;
             }
+            
+            /* Export PDF Button */
+            .btn-export-pdf {
+                background: transparent;
+                border: 1px solid var(--primary);
+                color: var(--primary);
+                padding: 6px 12px;
+                border-radius: 4px;
+                font-size: 12px;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+            
+            .btn-export-pdf:hover {
+                background: var(--primary);
+                color: var(--white);
+            }
+            
+            /* Print styles for PDF export */
+            @media print {
+                .navbar, .filter-panel, .btn-export-pdf, .btn-reset,
+                .hero-actions, .tabs-nav, .download-button {
+                    display: none !important;
+                }
+                
+                .main-wrapper {
+                    padding: 0 !important;
+                }
+                
+                .card {
+                    box-shadow: none !important;
+                    border: 1px solid #ddd !important;
+                    page-break-inside: avoid;
+                }
+                
+                .page-content {
+                    max-width: 100% !important;
+                }
+                
+                body {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+            }
         """),
         ui.tags.script("""
             // Force Plotly charts to resize after page load
@@ -635,6 +713,22 @@ app_ui = ui.page_fluid(
                     }
                 });
             });
+            
+            // Export current page as PDF using browser print
+            function exportPageAsPDF() {
+                // Add a temporary title for the PDF
+                var pageTitle = document.querySelector('.section-title, .hero-title');
+                var originalTitle = document.title;
+                if (pageTitle) {
+                    document.title = 'Enrollment Analytics - ' + pageTitle.textContent.trim();
+                }
+                
+                // Trigger print dialog (user can save as PDF)
+                window.print();
+                
+                // Restore original title
+                document.title = originalTitle;
+            }
         """),
     ),
     
