@@ -181,8 +181,27 @@ def overview_server(input, output, session, filtered_data, full_data, selected_y
         # Get YoY metrics
         yoy = get_yoy_metrics(df, year)
         
-        # Get aggregate metrics
-        agg = get_aggregate_metrics(df[df['year'] == year])
+        # Calculate aggregate metrics directly from raw data
+        # (raw data uses 'admissions' and 'enrolled_total' column names)
+        year_df = df[df['year'] == year]
+        
+        if year_df.empty:
+            return {}
+        
+        total_applicants = year_df['applicants'].sum()
+        total_admitted = year_df['admissions'].sum()
+        total_enrolled = year_df['enrolled_total'].sum()
+        
+        agg = {
+            'year': year,
+            'total_applicants': int(total_applicants),
+            'total_admitted': int(total_admitted),
+            'total_enrolled': int(total_enrolled),
+            'admit_rate': round((total_admitted / total_applicants * 100), 1) if total_applicants > 0 else 0,
+            'yield_rate': round((total_enrolled / total_admitted * 100), 1) if total_admitted > 0 else 0,
+            'overall_conversion': round((total_enrolled / total_applicants * 100), 1) if total_applicants > 0 else 0,
+            'institution_count': year_df['institution_name'].nunique(),
+        }
         
         return {**agg, **yoy}
     

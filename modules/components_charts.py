@@ -32,11 +32,11 @@ DEMOGRAPHICS_PALETTE = {
     'Non-Resident': '#64748B',
 }
 
+# Base layout without margin (margin is set per-chart to avoid duplicates)
 LAYOUT_DEFAULTS = {
     'font': {'family': 'Inter, sans-serif', 'size': 12, 'color': COLORS['primary']},
     'paper_bgcolor': COLORS['card'],
     'plot_bgcolor': COLORS['card'],
-    'margin': {'l': 50, 'r': 30, 't': 40, 'b': 50},
     'hoverlabel': {'bgcolor': COLORS['primary'], 'font_size': 12},
 }
 
@@ -118,6 +118,7 @@ def create_funnel_chart(
     
     fig.update_layout(
         **LAYOUT_DEFAULTS,
+        margin={'l': 50, 'r': 30, 't': 40, 'b': 50},
         title=None,
         showlegend=False,
         annotations=annotations,
@@ -169,6 +170,7 @@ def create_trends_chart(
     
     fig.update_layout(
         **LAYOUT_DEFAULTS,
+        margin={'l': 50, 'r': 30, 't': 40, 'b': 50},
         title=None,
         xaxis=dict(
             title=None,
@@ -243,6 +245,7 @@ def create_demographics_chart(
     
     fig.update_layout(
         **LAYOUT_DEFAULTS,
+        margin={'l': 50, 'r': 30, 't': 40, 'b': 50},
         title=None,
         barmode='stack' if chart_type == 'stacked_bar' else None,
         xaxis=dict(
@@ -342,6 +345,7 @@ def create_distribution_chart(
     
     fig.update_layout(
         **LAYOUT_DEFAULTS,
+        margin={'l': 50, 'r': 30, 't': 40, 'b': 50},
         title=None,
         showlegend=True,
         legend=dict(
@@ -452,6 +456,7 @@ def create_scatter_chart(
     
     fig.update_layout(
         **LAYOUT_DEFAULTS,
+        margin={'l': 50, 'r': 30, 't': 40, 'b': 50},
         title=None,
         xaxis=dict(
             title=x_label or x_col,
@@ -503,6 +508,7 @@ def create_waterfall_chart(
     
     fig.update_layout(
         **LAYOUT_DEFAULTS,
+        margin={'l': 50, 'r': 30, 't': 40, 'b': 50},
         title=None,
         showlegend=False,
         xaxis=dict(title=None),
@@ -530,10 +536,18 @@ def create_state_map(
     state_data = df.groupby('state').agg({
         metric: 'mean' if 'rate' in metric else 'sum',
         'institution_name': 'nunique',
-        'enrolled_total' if 'enrolled_total' in df.columns else 'enrolled': 'sum'
     }).reset_index()
     
-    state_data.columns = ['state', 'value', 'num_institutions', 'total_enrolled']
+    # Add enrolled total separately to handle column name
+    enrolled_col = 'enrolled_total' if 'enrolled_total' in df.columns else 'enrolled'
+    if enrolled_col in df.columns:
+        state_enrolled = df.groupby('state')[enrolled_col].sum().reset_index()
+        state_enrolled.columns = ['state', 'total_enrolled']
+        state_data = state_data.merge(state_enrolled, on='state', how='left')
+    else:
+        state_data['total_enrolled'] = 0
+    
+    state_data.columns = ['state', 'value', 'num_institutions'] + list(state_data.columns[3:])
     
     # Color scale based on metric type
     if 'rate' in metric:
@@ -573,7 +587,7 @@ def create_state_map(
             bgcolor=COLORS['card'],
         ),
         height=400,
-        margin={'l': 0, 'r': 0, 't': 20, 'b': 0},
+        margin={'l': 0, 'r': 0, 't': 20, 'b': 0},  # Map needs special margins
     )
     
     return fig
@@ -617,7 +631,7 @@ def create_comparison_bar_chart(
             tickfont=dict(size=11)
         ),
         height=max(300, n * 35),
-        margin={'l': 200, 'r': 50, 't': 20, 'b': 50},
+        margin={'l': 200, 'r': 50, 't': 20, 'b': 50},  # Bar chart needs wider left margin
     )
     
     return fig
@@ -666,6 +680,7 @@ def create_small_multiples_trends(
     
     fig.update_layout(
         **LAYOUT_DEFAULTS,
+        margin={'l': 50, 'r': 30, 't': 40, 'b': 50},
         height=150 * rows + 50,
         title=None,
     )

@@ -88,9 +88,9 @@ def create_global_filters(years: list, institutions: list, regions: list,
                 style="align-self: flex-end;"
             ),
             
-            class_="filter-bar-content"
+            class_="filter-row"
         ),
-        class_="filter-bar"
+        class_="filter-panel"
     )
 
 

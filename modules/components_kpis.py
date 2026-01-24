@@ -51,7 +51,7 @@ def create_kpi_card(
         ui.div(formatted_value, class_="kpi-value"),
         delta_element if delta_element else ui.span(),
         ui.div(subtext, class_="kpi-subtext") if subtext else ui.span(),
-        class_=f"kpi-card kpi-{card_type}"
+        class_=f"kpi-card {card_type}"
     )
 
 
