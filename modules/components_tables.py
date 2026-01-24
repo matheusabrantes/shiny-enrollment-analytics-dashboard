@@ -118,16 +118,19 @@ def create_peer_table(
     df: pd.DataFrame,
     target_institution: str = None,
     metric: str = 'yield_rate',
-    show_rank: bool = True
+    show_rank: bool = True,
+    top_n: int = 15
 ) -> ui.Tag:
     """
     Create a peer comparison table with rankings.
+    Shows top N institutions, plus the target institution if not in top N.
     
     Args:
         df: DataFrame with peer data
         target_institution: Institution to highlight
         metric: Primary metric for ranking
         show_rank: Whether to show rank column
+        top_n: Number of top institutions to display
     """
     if df.empty:
         return ui.div(
@@ -135,9 +138,19 @@ def create_peer_table(
             class_="data-table-container"
         )
     
-    # Sort by metric
+    # Sort by metric and assign ranks
     sorted_df = df.sort_values(metric, ascending=False).reset_index(drop=True)
     sorted_df['rank'] = range(1, len(sorted_df) + 1)
+    
+    # Get top N
+    display_df = sorted_df.head(top_n).copy()
+    
+    # If target institution is not in top N, append it with a separator
+    if target_institution and target_institution in sorted_df['institution_name'].values:
+        target_rank = sorted_df[sorted_df['institution_name'] == target_institution]['rank'].iloc[0]
+        if target_rank > top_n:
+            target_row = sorted_df[sorted_df['institution_name'] == target_institution].copy()
+            display_df = pd.concat([display_df, target_row], ignore_index=True)
     
     # Columns to display
     columns = ['rank', 'institution_name', metric, 'enrolled', 'state', 'institution_size']
@@ -145,10 +158,10 @@ def create_peer_table(
         columns.append('diversity_index')
     
     # Filter to available columns
-    columns = [c for c in columns if c in sorted_df.columns or c == 'rank']
+    columns = [c for c in columns if c in display_df.columns or c == 'rank']
     
     return create_data_table(
-        sorted_df,
+        display_df,
         columns=columns,
         highlight_institution=target_institution
     )

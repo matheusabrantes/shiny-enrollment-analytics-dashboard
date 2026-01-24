@@ -61,7 +61,7 @@ def create_funnel_chart(
     
     fig = go.Figure()
     
-    # Main funnel
+    # Main funnel - constrained width to ~70% to avoid annotation overlap
     fig.add_trace(go.Funnel(
         y=['Applicants', 'Admitted', 'Enrolled'],
         x=[applicants, admitted, enrolled],
@@ -73,7 +73,8 @@ def create_funnel_chart(
             'line': {'width': 0}
         },
         connector={'line': {'color': COLORS['border'], 'width': 1}},
-        hovertemplate='<b>%{y}</b><br>Count: %{x:,.0f}<br>%{percentInitial:.1%} of applicants<extra></extra>'
+        hovertemplate='<b>%{y}</b><br>Count: %{x:,.0f}<br>%{percentInitial:.1%} of applicants<extra></extra>',
+        constraintext='both',
     ))
     
     # Add annotations for conversion rates
@@ -118,7 +119,7 @@ def create_funnel_chart(
     
     fig.update_layout(
         **LAYOUT_DEFAULTS,
-        margin={'l': 50, 'r': 30, 't': 40, 'b': 50},
+        margin={'l': 80, 'r': 180, 't': 40, 'b': 50},  # Wider right margin to give space for annotations
         title=None,
         showlegend=False,
         annotations=annotations,
@@ -387,9 +388,37 @@ def create_scatter_chart(
     """
     fig = go.Figure()
     
+    # Handle empty dataframe or missing columns
+    if df.empty or x_col not in df.columns or y_col not in df.columns:
+        fig.update_layout(
+            annotations=[dict(
+                text="No data available for context map",
+                xref="paper", yref="paper",
+                x=0.5, y=0.5, showarrow=False,
+                font=dict(size=14, color=COLORS['muted'])
+            )],
+            height=400
+        )
+        return fig
+    
+    # Drop rows with missing x or y values
+    df = df.dropna(subset=[x_col, y_col]).copy()
+    
+    if df.empty:
+        fig.update_layout(
+            annotations=[dict(
+                text="No valid data points for context map",
+                xref="paper", yref="paper",
+                x=0.5, y=0.5, showarrow=False,
+                font=dict(size=14, color=COLORS['muted'])
+            )],
+            height=400
+        )
+        return fig
+    
     # Prepare size values
     if size_col and size_col in df.columns:
-        sizes = df[size_col]
+        sizes = df[size_col].fillna(df[size_col].median())
         # Normalize sizes
         size_min, size_max = sizes.min(), sizes.max()
         if size_max > size_min:
@@ -508,12 +537,12 @@ def create_waterfall_chart(
     
     fig.update_layout(
         **LAYOUT_DEFAULTS,
-        margin={'l': 50, 'r': 30, 't': 40, 'b': 50},
+        margin={'l': 50, 'r': 30, 't': 70, 'b': 50},  # Increased top margin for text labels
         title=None,
         showlegend=False,
         xaxis=dict(title=None),
         yaxis=dict(title='Enrolled Students'),
-        height=350,
+        height=380,  # Slightly taller to accommodate labels
     )
     
     return fig

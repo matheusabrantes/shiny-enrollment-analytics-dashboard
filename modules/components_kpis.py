@@ -185,17 +185,38 @@ def create_kpi_grid(kpis: list) -> ui.Tag:
     )
 
 
-def create_insights_panel(insights: list, institution_name: str = None) -> ui.Tag:
+def create_insights_panel(insights: list, institution_name: str = None, no_data: bool = False) -> ui.Tag:
     """
     Create the dynamic insights panel.
     
     Args:
         insights: List of insight dicts from generate_insights()
         institution_name: Optional institution name for header
+        no_data: Whether the institution has no data available
     
     Returns:
         UI Tag for the insights panel
     """
+    if no_data:
+        return ui.div(
+            ui.p(f"No data available for {institution_name} in the selected year",
+                 style="color: var(--color-text-muted); text-align: center; padding: 16px;"),
+            class_="insights-panel"
+        )
+    
+    if not insights and institution_name:
+        # Institution found but no specific insights generated - show neutral message
+        return ui.div(
+            ui.div(
+                ui.span("💡", class_="insights-icon"),
+                ui.span(f"💡 Insights for {institution_name}", class_="insights-title"),
+                class_="insights-header"
+            ),
+            ui.p("This institution is performing within typical ranges for all tracked metrics.",
+                 style="color: var(--color-text-muted); padding: 8px 16px;"),
+            class_="insights-panel"
+        )
+    
     if not insights:
         return ui.div(
             ui.p("Select an institution to view personalized insights",

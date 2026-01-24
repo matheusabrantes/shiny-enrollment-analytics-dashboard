@@ -97,8 +97,9 @@ app_ui = ui.page_fluid(
             
             .navbar-subtitle {
                 font-size: 12px;
-                opacity: 0.8;
+                opacity: 0.9;
                 margin: 4px 0 0 0;
+                color: var(--white);  /* Fix: Ensure subtitle is white */
             }
             
             .navbar-nav {
@@ -109,7 +110,7 @@ app_ui = ui.page_fluid(
             .nav-link {
                 background: transparent;
                 border: 1px solid rgba(255,255,255,0.3);
-                color: var(--white);
+                color: rgba(255,255,255,0.7);  /* Non-selected: light gray */
                 padding: 8px 16px;
                 border-radius: 6px;
                 font-size: 13px;
@@ -117,9 +118,16 @@ app_ui = ui.page_fluid(
                 transition: all 0.2s;
             }
             
-            .nav-link:hover, .nav-link.active {
+            .nav-link:hover {
+                background: rgba(255,255,255,0.1);
+                color: var(--white);
+            }
+            
+            .nav-link.active {
                 background: rgba(255,255,255,0.2);
                 border-color: var(--white);
+                color: var(--white);  /* Active: white text */
+                font-weight: 600;
             }
             
             /* Filter Panel */
@@ -542,6 +550,30 @@ app_ui = ui.page_fluid(
                 margin-right: 12px;
             }
             
+            /* Filter row alignment fix */
+            .filter-row {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-end;
+                gap: 16px;
+            }
+            
+            .filter-group.filter-years {
+                flex-shrink: 0;
+            }
+            
+            .filter-group.filter-institution {
+                min-width: 220px;
+            }
+            
+            /* KPI card title height fix for Simulator */
+            .kpi-card .kpi-label {
+                min-height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
             .selectize-input {
                 border-radius: 4px !important;
             }
@@ -580,6 +612,28 @@ app_ui = ui.page_fluid(
             
             document.addEventListener('DOMContentLoaded', function() {
                 observer.observe(document.body, { childList: true, subtree: true });
+            });
+            
+            // Update navbar active state when clicking navigation buttons
+            function updateNavActive(activeId) {
+                document.querySelectorAll('.nav-link').forEach(function(btn) {
+                    btn.classList.remove('active');
+                });
+                var activeBtn = document.getElementById(activeId);
+                if (activeBtn) {
+                    activeBtn.classList.add('active');
+                }
+            }
+            
+            document.addEventListener('DOMContentLoaded', function() {
+                ['nav_overview', 'nav_benchmarking', 'nav_profile', 'nav_simulator'].forEach(function(id) {
+                    var btn = document.getElementById(id);
+                    if (btn) {
+                        btn.addEventListener('click', function() {
+                            updateNavActive(id);
+                        });
+                    }
+                });
             });
         """),
     ),

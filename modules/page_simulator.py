@@ -153,6 +153,9 @@ def simulator_ui():
                                 min=0,
                                 step=100
                             ),
+                            # Explanatory text for enrollment goal
+                            ui.p("Enter a target enrollment. The simulator will compute whether the goal is achievable under the current scenario.",
+                                 style="font-size: 11px; color: var(--color-text-muted); margin-top: 8px;"),
                             class_="filter-group"
                         ),
                         ui.output_ui("sim_goal_recommendations"),
@@ -191,6 +194,9 @@ def simulator_ui():
                     ),
                     ui.div(
                         output_widget("sim_sensitivity_chart"),
+                        # Caption explaining how to interpret the chart
+                        ui.p("Each line shows how projected enrollment changes as you adjust one lever while holding others constant.",
+                             style="font-size: 11px; color: var(--color-text-muted); margin-top: 12px; text-align: center;"),
                         class_="card-body"
                     ),
                     class_="card chart-section"
@@ -456,12 +462,12 @@ def simulator_server(input, output, session, filtered_data, full_data,
             font={'family': 'Inter, sans-serif', 'size': 12},
             paper_bgcolor='#FFFFFF',
             plot_bgcolor='#FFFFFF',
-            margin={'l': 50, 'r': 30, 't': 40, 'b': 50},
+            margin={'l': 50, 'r': 30, 't': 60, 'b': 50},  # Increased top margin for labels
             barmode='group',
             legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='left', x=0),
             xaxis=dict(title=None),
             yaxis=dict(title='Count', gridcolor='#E2E8F0'),
-            height=300,
+            height=320,  # Slightly taller to accommodate labels
         )
         
         return fig

@@ -23,18 +23,14 @@ from utils.data_model import get_aggregate_metrics
 def overview_ui():
     """Create the Overview page UI."""
     return ui.div(
-        # Page header
+        # Page header with insights directly below title
         ui.div(
-            ui.div(
-                ui.h2("Executive Overview", class_="section-title", style="margin: 0;"),
-                ui.p("Comprehensive view of enrollment funnel metrics across selected institutions", 
-                     class_="section-subtitle"),
-            ),
-            ui.div(
-                ui.output_ui("overview_insights_panel"),
-            ),
-            class_="section-header",
-            style="margin-bottom: 24px; flex-wrap: wrap; gap: 16px;"
+            ui.h2("Executive Overview", class_="section-title", style="margin: 0;"),
+            ui.p("Comprehensive view of enrollment funnel metrics across selected institutions", 
+                 class_="section-subtitle"),
+            # Insights panel directly under title for better visibility
+            ui.output_ui("overview_insights_panel"),
+            style="margin-bottom: 24px;"
         ),
         
         # KPI Cards Row
@@ -342,7 +338,8 @@ def overview_server(input, output, session, filtered_data, full_data, selected_y
         inst_data = year_data[year_data['institution_name'] == inst]
         
         if inst_data.empty:
-            return ui.div()
+            # Institution not found in data for this year
+            return create_insights_panel([], inst, no_data=True)
         
         inst_row = inst_data.iloc[0].to_dict()
         
@@ -351,16 +348,22 @@ def overview_server(input, output, session, filtered_data, full_data, selected_y
         for metric in ['yield_rate', 'admit_rate', 'diversity_index']:
             if metric in year_data.columns:
                 values = year_data[metric].dropna()
-                peer_percentiles[metric] = {
-                    'p25': values.quantile(0.25),
-                    'p50': values.quantile(0.50),
-                    'p75': values.quantile(0.75),
-                }
+                if not values.empty:
+                    peer_percentiles[metric] = {
+                        'p25': values.quantile(0.25),
+                        'p50': values.quantile(0.50),
+                        'p75': values.quantile(0.75),
+                    }
         
-        # Get YoY metrics
-        yoy = get_yoy_metrics(df[df['institution_name'] == inst], year)
+        # Get YoY metrics for this specific institution
+        inst_df = df[df['institution_name'] == inst]
+        yoy = get_yoy_metrics(inst_df, year) if not inst_df.empty else {}
         
         insights = generate_insights(inst_row, peer_percentiles, yoy)
+        
+        # If no insights generated, provide a fallback message
+        if not insights:
+            return create_insights_panel([], inst, no_data=False)
         
         return create_insights_panel(insights, inst)
     

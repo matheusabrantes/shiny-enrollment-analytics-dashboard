@@ -551,12 +551,18 @@ def generate_insights(
     if yoy_metrics and yoy_metrics.get('delta_enrolled') is not None:
         delta = yoy_metrics['delta_enrolled']
         if delta < -5:
-            driver = yoy_metrics.get('primary_driver', 'unknown')
+            driver = yoy_metrics.get('primary_driver', '')
+            # Provide clear fallback message if driver is unknown or empty
+            if driver and driver != 'unknown':
+                driver_text = driver.replace('_', ' ').title()
+                detail_msg = f"Primary driver: {driver_text}"
+            else:
+                detail_msg = "Insufficient data to compute drivers for this institution"
             insights.append({
                 'type': 'danger',
                 'metric': 'enrolled',
                 'message': f"Enrollment declined {abs(delta):.1f}% year-over-year",
-                'detail': f"Primary driver: {driver.replace('_', ' ')}"
+                'detail': detail_msg
             })
         elif delta > 10:
             insights.append({

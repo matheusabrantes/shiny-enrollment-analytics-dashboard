@@ -74,6 +74,19 @@ def profile_server(input, output, session, filtered_data, full_data,
                    selected_years, selected_institution, latest_year, institutions_list):
     """Server logic for the Institution Profile page."""
     
+    # Reactive value for compare basket
+    compare_basket = reactive.value([])
+    
+    # Add to Compare handler
+    @reactive.effect
+    @reactive.event(input.profile_add_compare)
+    def add_to_compare():
+        inst = selected_institution()
+        if inst:
+            current = compare_basket.get()
+            if inst not in current and len(current) < 5:
+                compare_basket.set(current + [inst])
+    
     # Reactive: Get institution data across all years
     @reactive.calc
     def institution_data():
@@ -128,11 +141,7 @@ def profile_server(input, output, session, filtered_data, full_data,
                     "➕ Add to Compare",
                     class_="hero-btn"
                 ),
-                ui.input_action_button(
-                    "profile_share",
-                    "🔗 Share Link",
-                    class_="hero-btn"
-                ),
+                # Share Link button removed as it had no functionality
                 class_="hero-actions"
             ),
             class_="hero-section"
@@ -610,5 +619,39 @@ def profile_server(input, output, session, filtered_data, full_data,
     # Compare Section
     @render.ui
     def profile_compare_section():
-        # Placeholder for compare basket functionality
-        return ui.div()
+        basket = compare_basket.get()
+        if not basket:
+            return ui.div()
+        
+        df = full_data()
+        year = latest_year()
+        
+        return ui.div(
+            ui.div(
+                ui.h3(f"Compare Basket ({len(basket)}/5)", class_="card-title"),
+                ui.input_action_button(
+                    "profile_clear_compare",
+                    "Clear All",
+                    class_="btn btn-secondary btn-sm"
+                ),
+                class_="card-header"
+            ),
+            ui.div(
+                ui.div(
+                    *[ui.span(inst[:25] + "..." if len(inst) > 25 else inst, 
+                              class_="badge badge-info", style="margin-right: 8px; margin-bottom: 4px;")
+                      for inst in basket],
+                    style="margin-bottom: 16px;"
+                ),
+                create_comparison_table(basket, df, year) if len(basket) > 1 else 
+                    ui.p("Add more institutions to compare", style="color: var(--color-text-muted);"),
+                class_="card-body"
+            ),
+            class_="card chart-section"
+        )
+    
+    # Clear compare basket
+    @reactive.effect
+    @reactive.event(input.profile_clear_compare)
+    def clear_compare():
+        compare_basket.set([])
