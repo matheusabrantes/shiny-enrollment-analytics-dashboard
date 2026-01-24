@@ -622,6 +622,14 @@ app_ui = ui.page_fluid(
                 padding-bottom: 0;
             }
             
+            /* Reset button alignment - must match dropdown height exactly */
+            .filter-group .btn-reset {
+                height: 34px;
+                line-height: 34px;
+                padding: 0 16px;
+                margin-bottom: 0;
+            }
+            
             /* KPI card title height fix for Simulator */
             .kpi-card .kpi-label {
                 min-height: 32px;
@@ -756,26 +764,58 @@ app_ui = ui.page_fluid(
             }
             
             // Prevent client-side errors during page transitions
-            // Wrap Shiny's setInputValue to handle undefined targets gracefully
-            (function() {
-                var originalSetInputValue = Shiny.setInputValue;
-                if (originalSetInputValue) {
-                    Shiny.setInputValue = function(name, value, opts) {
-                        try {
-                            return originalSetInputValue.call(Shiny, name, value, opts);
-                        } catch (e) {
-                            console.warn('Shiny setInputValue error caught:', e.message);
-                        }
-                    };
-                }
-            })();
+            // Wait for Shiny to be fully initialized before wrapping
+            document.addEventListener('DOMContentLoaded', function() {
+                // Delay to ensure Shiny is loaded
+                setTimeout(function() {
+                    if (typeof Shiny !== 'undefined' && Shiny.setInputValue) {
+                        var originalSetInputValue = Shiny.setInputValue;
+                        Shiny.setInputValue = function(name, value, opts) {
+                            try {
+                                return originalSetInputValue.call(Shiny, name, value, opts);
+                            } catch (e) {
+                                console.warn('Shiny setInputValue error caught:', e.message);
+                            }
+                        };
+                    }
+                    
+                    // Wrap Shiny's bindAll to handle missing elements
+                    if (typeof Shiny !== 'undefined' && Shiny.bindAll) {
+                        var originalBindAll = Shiny.bindAll;
+                        Shiny.bindAll = function(scope) {
+                            try {
+                                if (scope && document.body.contains(scope)) {
+                                    return originalBindAll.call(Shiny, scope);
+                                }
+                            } catch (e) {
+                                console.warn('Shiny bindAll error caught:', e.message);
+                            }
+                        };
+                    }
+                }, 100);
+            });
             
-            // Handle Plotly resize errors gracefully during page transitions
+            // Handle Plotly and widget errors gracefully during page transitions
             window.addEventListener('error', function(e) {
-                if (e.message && e.message.includes('Cannot set properties of undefined')) {
+                if (e.message && (
+                    e.message.includes('Cannot set properties of undefined') ||
+                    e.message.includes('Cannot read properties of undefined') ||
+                    e.message.includes('Cannot read properties of null')
+                )) {
                     e.preventDefault();
-                    console.warn('Plotly transition error suppressed');
+                    console.warn('Widget transition error suppressed:', e.message.substring(0, 100));
                     return true;
+                }
+            });
+            
+            // Also catch unhandled promise rejections
+            window.addEventListener('unhandledrejection', function(e) {
+                if (e.reason && e.reason.message && (
+                    e.reason.message.includes('Cannot set properties of undefined') ||
+                    e.reason.message.includes('Cannot read properties of undefined')
+                )) {
+                    e.preventDefault();
+                    console.warn('Widget promise rejection suppressed');
                 }
             });
         """),

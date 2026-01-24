@@ -80,44 +80,49 @@ def create_funnel_chart(
     # Constrain funnel to left 60% of chart area to leave space for annotations
     fig.update_xaxes(domain=[0, 0.6])
     
-    # Add annotations for conversion rates - positioned with consistent alignment
-    # Font sizes doubled for better readability
+    # Add annotations for conversion rates - aligned in a clean vertical column
+    # Font sizes reduced by 20% for better balance
+    # All labels aligned at x=0.78 (left-aligned) within the annotation area
     annotations = [
         dict(
-            x=0.72, y=0.78,
+            x=0.78, y=0.72,
             text=f"<b>Selection Rate</b><br>{admit_rate:.1f}%",
             showarrow=False,
-            font=dict(size=18, color=COLORS['primary']),
-            align='center',
-            xref='paper', yref='paper'
+            font=dict(size=14, color=COLORS['primary']),
+            align='left',
+            xref='paper', yref='paper',
+            xanchor='left'
         ),
         dict(
-            x=0.72, y=0.28,
+            x=0.78, y=0.32,
             text=f"<b>Yield Rate</b><br>{yield_rate:.1f}%",
             showarrow=False,
-            font=dict(size=18, color=COLORS['primary']),
-            align='center',
-            xref='paper', yref='paper'
+            font=dict(size=14, color=COLORS['primary']),
+            align='left',
+            xref='paper', yref='paper',
+            xanchor='left'
         ),
     ]
     
     if show_leakage:
         annotations.extend([
             dict(
-                x=0.72, y=0.58,
-                text=f"<span style='color:{COLORS['danger']}'>▼ {leakage1:,.0f} not admitted</span>",
+                x=0.78, y=0.52,
+                text=f"▼ {leakage1:,.0f} not admitted",
                 showarrow=False,
-                font=dict(size=16, color=COLORS['danger']),
-                align='center',
-                xref='paper', yref='paper'
+                font=dict(size=13, color=COLORS['danger']),
+                align='left',
+                xref='paper', yref='paper',
+                xanchor='left'
             ),
             dict(
-                x=0.72, y=0.08,
-                text=f"<span style='color:{COLORS['danger']}'>▼ {leakage2:,.0f} did not enroll</span>",
+                x=0.78, y=0.12,
+                text=f"▼ {leakage2:,.0f} did not enroll",
                 showarrow=False,
-                font=dict(size=16, color=COLORS['danger']),
-                align='center',
-                xref='paper', yref='paper'
+                font=dict(size=13, color=COLORS['danger']),
+                align='left',
+                xref='paper', yref='paper',
+                xanchor='left'
             ),
         ])
     

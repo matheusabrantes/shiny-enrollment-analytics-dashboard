@@ -300,6 +300,12 @@ def benchmarking_server(input, output, session, filtered_data, full_data,
         else:
             peers = year_data
         
+        # Always ensure target institution is included in peers for proper ranking display
+        if target and target not in peers['institution_name'].values:
+            target_row = year_data[year_data['institution_name'] == target]
+            if not target_row.empty:
+                peers = pd.concat([peers, target_row], ignore_index=True)
+        
         return peers
     
     # Reactive: Peer statistics
