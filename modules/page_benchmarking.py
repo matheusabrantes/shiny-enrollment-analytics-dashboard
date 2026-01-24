@@ -165,8 +165,15 @@ def benchmarking_ui():
 
 
 def benchmarking_server(input, output, session, filtered_data, full_data, 
-                        selected_years, selected_institution, latest_year, institutions_list):
+                        selected_years, selected_institution, latest_year, institutions_list,
+                        current_page=None):
     """Server logic for the Benchmarking page."""
+    
+    def is_active():
+        """Check if this page is currently active."""
+        if current_page is None:
+            return True
+        return current_page.get() == "benchmarking"
     
     # Target institution selector
     @render.ui
@@ -446,6 +453,8 @@ def benchmarking_server(input, output, session, filtered_data, full_data,
     # Distribution Chart
     @render_widget
     def bench_distribution_chart():
+        if not is_active():
+            return create_distribution_chart(pd.Series([]))
         peers = peer_group()
         target = target_data()
         metric = input.bench_metric()
@@ -488,6 +497,8 @@ def benchmarking_server(input, output, session, filtered_data, full_data,
     # Scatter Chart
     @render_widget
     def bench_scatter_chart():
+        if not is_active():
+            return create_scatter_chart(pd.DataFrame(), 'applicants', 'yield_rate')
         peers = peer_group()
         target = input.bench_target()
         

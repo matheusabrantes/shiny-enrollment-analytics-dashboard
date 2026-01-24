@@ -222,8 +222,15 @@ def simulator_ui():
 
 
 def simulator_server(input, output, session, filtered_data, full_data,
-                     selected_years, selected_institution, latest_year, institutions_list):
+                     selected_years, selected_institution, latest_year, institutions_list,
+                     current_page=None):
     """Server logic for the Simulator page."""
+    
+    def is_active():
+        """Check if this page is currently active."""
+        if current_page is None:
+            return True
+        return current_page.get() == "simulator"
     
     # Institution selector
     @render.ui
@@ -427,6 +434,10 @@ def simulator_server(input, output, session, filtered_data, full_data,
     # Comparison Chart
     @render_widget
     def sim_comparison_chart():
+        if not is_active():
+            fig = go.Figure()
+            fig.update_layout(height=300)
+            return fig
         proj = projected_data()
         base = base_data()
         
@@ -487,6 +498,10 @@ def simulator_server(input, output, session, filtered_data, full_data,
     # Sensitivity Chart
     @render_widget
     def sim_sensitivity_chart():
+        if not is_active():
+            fig = go.Figure()
+            fig.update_layout(height=300)
+            return fig
         base = base_data()
         
         if not base:

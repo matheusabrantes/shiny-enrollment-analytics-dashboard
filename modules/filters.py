@@ -77,15 +77,15 @@ def create_global_filters(years: list, institutions: list, regions: list,
                 class_="filter-group filter-institution"
             ),
             
-            # Reset button
+            # Reset button - add empty label to match other filter groups
             ui.div(
+                ui.div(" ", class_="filter-label", style="visibility: hidden;"),
                 ui.input_action_button(
                     "reset_filters",
                     "↻ Reset",
                     class_="btn-reset"
                 ),
-                class_="filter-group",
-                style="align-self: flex-end;"
+                class_="filter-group"
             ),
             
             class_="filter-row"

@@ -81,8 +81,15 @@ def profile_ui():
 
 
 def profile_server(input, output, session, filtered_data, full_data,
-                   selected_years, selected_institution, latest_year, institutions_list):
+                   selected_years, selected_institution, latest_year, institutions_list,
+                   current_page=None):
     """Server logic for the Institution Profile page."""
+    
+    def is_active():
+        """Check if this page is currently active."""
+        if current_page is None:
+            return True
+        return current_page.get() == "profile"
     
     # Reactive value for compare basket
     compare_basket = reactive.value([])
@@ -372,6 +379,8 @@ def profile_server(input, output, session, filtered_data, full_data,
     # Trends Chart (counts)
     @render_widget
     def profile_trends_chart():
+        if not is_active():
+            return create_trends_chart(pd.DataFrame())
         inst_df = institution_data()
         
         if inst_df.empty:
@@ -419,6 +428,8 @@ def profile_server(input, output, session, filtered_data, full_data,
     # Rates Chart
     @render_widget
     def profile_rates_chart():
+        if not is_active():
+            return create_trends_chart(pd.DataFrame())
         inst_df = institution_data()
         
         if inst_df.empty:
@@ -435,6 +446,8 @@ def profile_server(input, output, session, filtered_data, full_data,
     # Waterfall Chart
     @render_widget
     def profile_waterfall_chart():
+        if not is_active():
+            return create_waterfall_chart(0, 0, 0, 0, 0)
         inst_df = institution_data()
         
         if inst_df.empty or len(inst_df) < 2:
@@ -509,6 +522,8 @@ def profile_server(input, output, session, filtered_data, full_data,
     # Demographics Chart
     @render_widget
     def profile_demographics_chart():
+        if not is_active():
+            return create_demographics_chart(pd.DataFrame())
         inst_df = institution_data()
         
         if inst_df.empty:

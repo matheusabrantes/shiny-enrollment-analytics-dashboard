@@ -1005,14 +1005,15 @@ def server(input, output, session):
     # Page-specific Server Logic
     # =========================================================================
     
-    # Call page servers with shared reactive values
+    # Call page servers with shared reactive values and current_page for guards
     overview_server(
         input, output, session,
         filtered_data=filtered_data,
         full_data=full_data,
         selected_years=selected_years_list,
         selected_institution=selected_institution,
-        latest_year=latest_year
+        latest_year=latest_year,
+        current_page=current_page
     )
     
     benchmarking_server(
@@ -1022,7 +1023,8 @@ def server(input, output, session):
         selected_years=selected_years_list,
         selected_institution=selected_institution,
         latest_year=latest_year,
-        institutions_list=INSTITUTIONS
+        institutions_list=INSTITUTIONS,
+        current_page=current_page
     )
     
     profile_server(
@@ -1032,7 +1034,8 @@ def server(input, output, session):
         selected_years=selected_years_list,
         selected_institution=selected_institution,
         latest_year=latest_year,
-        institutions_list=INSTITUTIONS
+        institutions_list=INSTITUTIONS,
+        current_page=current_page
     )
     
     simulator_server(
@@ -1042,7 +1045,8 @@ def server(input, output, session):
         selected_years=selected_years_list,
         selected_institution=selected_institution,
         latest_year=latest_year,
-        institutions_list=INSTITUTIONS
+        institutions_list=INSTITUTIONS,
+        current_page=current_page
     )
 
 

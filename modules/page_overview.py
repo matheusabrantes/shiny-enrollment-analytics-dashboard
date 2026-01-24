@@ -166,8 +166,14 @@ def overview_ui():
 
 
 def overview_server(input, output, session, filtered_data, full_data, selected_years, 
-                    selected_institution, latest_year):
+                    selected_institution, latest_year, current_page=None):
     """Server logic for the Overview page."""
+    
+    def is_active():
+        """Check if this page is currently active."""
+        if current_page is None:
+            return True
+        return current_page.get() == "overview"
     
     # Reactive: Aggregate metrics with YoY
     @reactive.calc
@@ -376,6 +382,8 @@ def overview_server(input, output, session, filtered_data, full_data, selected_y
     # Funnel Chart
     @render_widget
     def overview_funnel_chart():
+        if not is_active():
+            return create_funnel_chart(0, 0, 0)
         df = filtered_data()
         if df.empty:
             return create_funnel_chart(0, 0, 0)
@@ -389,6 +397,8 @@ def overview_server(input, output, session, filtered_data, full_data, selected_y
     # Trends Chart
     @render_widget
     def overview_trends_chart():
+        if not is_active():
+            return create_trends_chart(pd.DataFrame({'year': [], 'admit_rate': [], 'yield_rate': []}))
         df = filtered_data()
         if df.empty:
             return create_trends_chart(pd.DataFrame({'year': [], 'admit_rate': [], 'yield_rate': []}))
@@ -409,6 +419,8 @@ def overview_server(input, output, session, filtered_data, full_data, selected_y
     # Demographics Chart
     @render_widget
     def overview_demographics_chart():
+        if not is_active():
+            return create_demographics_chart(pd.DataFrame())
         df = filtered_data()
         if df.empty:
             return create_demographics_chart(pd.DataFrame())
@@ -441,6 +453,8 @@ def overview_server(input, output, session, filtered_data, full_data, selected_y
     # Geographic Map
     @render_widget
     def overview_map():
+        if not is_active():
+            return create_state_map(pd.DataFrame(), 'enrolled_total')
         df = filtered_data()
         metric = input.overview_map_metric()
         
@@ -452,6 +466,8 @@ def overview_server(input, output, session, filtered_data, full_data, selected_y
     # Ranking Chart
     @render_widget
     def overview_ranking_chart():
+        if not is_active():
+            return create_comparison_bar_chart(pd.DataFrame(), 'yield_rate')
         df = filtered_data()
         metric = input.overview_ranking_metric()
         
