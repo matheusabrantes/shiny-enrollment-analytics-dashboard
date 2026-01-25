@@ -616,6 +616,10 @@ app_ui = ui.page_fluid(
                 flex-direction: column;
                 justify-content: flex-end;
             }
+
+            .filter-row .shiny-input-container {
+                margin-bottom: 0;
+            }
             
             .filter-row .filter-group:last-child {
                 align-self: flex-end;
@@ -628,6 +632,12 @@ app_ui = ui.page_fluid(
                 line-height: 36px;
                 padding: 0 16px;
                 margin-bottom: 0;
+            }
+
+            @media (min-width: 1200px) {
+                .filter-row {
+                    flex-wrap: nowrap;
+                }
             }
             
             /* KPI card title height fix for Simulator */
