@@ -5,6 +5,8 @@ Interactive data visualization dashboard analyzing enrollment funnel performance
 **Author:** Matheus Abrantes  
 **Date:** January 2026
 
+**Live demo:** https://matheusabrantes-higher-ed-enrollment-funnel-analytics.share.connect.posit.cloud/
+
 ---
 
 ## 🎯 Project Overview
