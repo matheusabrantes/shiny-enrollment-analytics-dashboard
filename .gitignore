@@ -51,3 +51,7 @@ htmlcov/
 # Local configuration
 .env
 .env.local
+
+# Personal notes
+*.personal.md
+CARNEGIE_*.md
