@@ -105,7 +105,7 @@ def create_funnel_chart(
     annotations = [
         dict(
             x=0.68,
-            y=0.4,
+            y=0.3,
             text="<br>".join(metrics_lines),
             showarrow=False,
             align='left',
