@@ -91,6 +91,7 @@ def create_funnel_chart(
         metrics_lines.append(
             f"<span style='font-size:13px;color:{COLORS['danger']}'>▼ {leakage1:,.0f} not admitted</span>"
         )
+        metrics_lines.append("")
     
     metrics_lines.extend([
         f"<span style='font-size:14px;color:{COLORS['primary']}'><b>Yield Rate</b></span>",
