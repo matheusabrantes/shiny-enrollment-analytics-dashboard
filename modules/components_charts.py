@@ -80,51 +80,41 @@ def create_funnel_chart(
     # Constrain funnel to left 60% of chart area to leave space for annotations
     fig.update_xaxes(domain=[0, 0.6])
     
-    # Add annotations for conversion rates - aligned in a clean vertical column
-    # Font sizes reduced by 20% for better balance
-    # All labels aligned at x=0.66 (left-aligned) within the annotation area
-    annotations = [
-        dict(
-            x=0.66, y=0.72,
-            text=f"<b>Selection Rate</b><br>{admit_rate:.1f}%",
-            showarrow=False,
-            font=dict(size=14, color=COLORS['primary']),
-            align='left',
-            xref='paper', yref='paper',
-            xanchor='left'
-        ),
-        dict(
-            x=0.66, y=0.32,
-            text=f"<b>Yield Rate</b><br>{yield_rate:.1f}%",
-            showarrow=False,
-            font=dict(size=14, color=COLORS['primary']),
-            align='left',
-            xref='paper', yref='paper',
-            xanchor='left'
-        ),
+    # Add right-side metrics block (Selection/Yield + leakage), vertically centered
+    # Keep existing formatting (sizes/colors), adjust only positioning/alignment.
+    metrics_lines = [
+        f"<span style='font-size:14px;color:{COLORS['primary']}'><b>Selection Rate</b></span>",
+        f"<span style='font-size:14px;color:{COLORS['primary']}'>{admit_rate:.1f}%</span>",
     ]
     
     if show_leakage:
-        annotations.extend([
-            dict(
-                x=0.66, y=0.52,
-                text=f"▼ {leakage1:,.0f} not admitted",
-                showarrow=False,
-                font=dict(size=13, color=COLORS['danger']),
-                align='left',
-                xref='paper', yref='paper',
-                xanchor='left'
-            ),
-            dict(
-                x=0.66, y=0.12,
-                text=f"▼ {leakage2:,.0f} did not enroll",
-                showarrow=False,
-                font=dict(size=13, color=COLORS['danger']),
-                align='left',
-                xref='paper', yref='paper',
-                xanchor='left'
-            ),
-        ])
+        metrics_lines.append(
+            f"<span style='font-size:13px;color:{COLORS['danger']}'>▼ {leakage1:,.0f} not admitted</span>"
+        )
+    
+    metrics_lines.extend([
+        f"<span style='font-size:14px;color:{COLORS['primary']}'><b>Yield Rate</b></span>",
+        f"<span style='font-size:14px;color:{COLORS['primary']}'>{yield_rate:.1f}%</span>",
+    ])
+    
+    if show_leakage:
+        metrics_lines.append(
+            f"<span style='font-size:13px;color:{COLORS['danger']}'>▼ {leakage2:,.0f} did not enroll</span>"
+        )
+    
+    annotations = [
+        dict(
+            x=0.68,
+            y=0.5,
+            text="<br>".join(metrics_lines),
+            showarrow=False,
+            align='left',
+            xref='paper',
+            yref='paper',
+            xanchor='left',
+            yanchor='middle'
+        )
+    ]
     
     fig.update_layout(
         **LAYOUT_DEFAULTS,
