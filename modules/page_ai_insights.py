@@ -1,6 +1,6 @@
 """
 AI Insights page module for the enrollment dashboard.
-Provides LLM-powered natural language analytics using OpenAI gpt-5.2.
+Provides LLM-powered natural language analytics using OpenAI gpt-5-mini.
 """
 
 from shiny import ui, reactive, render
@@ -23,34 +23,34 @@ def ai_insights_ui():
     return ui.div(
         # Page header
         ui.div(
-            ui.div(
-                ui.h2("AI Insights", class_="section-title", style="margin: 0;"),
-                ui.tags.span(
-                    "✨ Powered by GPT-5.2",
-                    style="font-size: 12px; color: #64748B; background: #F1F5F9; padding: 4px 8px; border-radius: 4px;"
-                ),
-                style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;"
-            ),
+            ui.h2("AI Insights", class_="section-title", style="margin: 0;"),
             ui.p("Ask questions about enrollment data in natural language and get AI-generated insights with visualizations", 
                  class_="section-subtitle"),
             style="margin-bottom: 24px;"
         ),
         
-        # API key status indicator
-        ui.output_ui("ai_api_status"),
-        
-        # Prompt input section
+        # Prompt input section with example buttons above
         ui.div(
             ui.div(
                 ui.h3("Ask Your Data", class_="card-title"),
                 class_="card-header"
             ),
             ui.div(
+                # Example query buttons (above the input)
+                ui.div(
+                    _create_example_button("example_1", "Which institutions in the South grew the most in enrollment between 2023 and 2024?"),
+                    _create_example_button("example_2", "Explain the main drivers behind enrollment changes for large private universities in 2024."),
+                    _create_example_button("example_3", "Compare Stanford to its peer institutions and show how their yield rates differ."),
+                    _create_example_button("example_4", "Which universities had unusually high admit rates in 2024? Show a ranked list."),
+                    _create_example_button("example_5", "Give me a national summary of the 2024 enrollment funnel and highlight key trends."),
+                    style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;"
+                ),
+                # Text input
                 ui.input_text_area(
                     "ai_prompt",
                     label=None,
-                    placeholder="Examples:\n• Which institutions have the highest yield rates in the Northeast?\n• Compare enrollment trends for large institutions from 2022-2024\n• What's the relationship between admit rate and yield rate?\n• Show me the most diverse institutions by region",
-                    rows=4,
+                    placeholder="Type your question about enrollment data here...",
+                    rows=3,
                     width="100%"
                 ),
                 ui.div(
@@ -62,7 +62,7 @@ def ai_insights_ui():
                     ),
                     ui.span(
                         ui.output_text("ai_loading_status"),
-                        style="margin-left: 12px; color: #64748B; font-size: 13px;"
+                        style="margin-left: 40px; color: #64748B; font-size: 13px;"
                     ),
                     style="margin-top: 12px; display: flex; align-items: center;"
                 ),
@@ -74,44 +74,26 @@ def ai_insights_ui():
         # Results section (hidden until results are available)
         ui.output_ui("ai_results_section"),
         
-        # Example queries section
-        ui.div(
-            ui.div(
-                ui.h3("Example Queries", class_="card-title"),
-                class_="card-header"
-            ),
-            ui.div(
-                ui.div(
-                    _create_example_chip("🏆 Top 10 institutions by yield rate"),
-                    _create_example_chip("📈 Enrollment trends in the Midwest"),
-                    _create_example_chip("🎯 Large institutions with admit rate > 50%"),
-                    _create_example_chip("🌎 Compare regions by average yield"),
-                    _create_example_chip("📊 Diversity index vs enrollment size"),
-                    _create_example_chip("🔍 Which small institutions have growing enrollment?"),
-                    style="display: flex; flex-wrap: wrap; gap: 8px;"
-                ),
-                class_="card-body"
-            ),
-            class_="card chart-section",
-            style="margin-top: 24px;"
-        ),
-        
         class_="page-content"
     )
 
 
-def _create_example_chip(text: str) -> ui.Tag:
-    """Create a styled example query chip."""
-    return ui.tags.span(
+def _create_example_button(id: str, text: str) -> ui.Tag:
+    """Create a clickable example query button."""
+    return ui.input_action_button(
+        id,
         text,
+        class_="example-query-btn",
         style="""
             background: #F1F5F9;
             color: #475569;
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 12px;
-            cursor: default;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
             display: inline-block;
+            border: 1px solid #E2E8F0;
+            transition: all 0.2s ease;
         """
     )
 
@@ -138,21 +120,39 @@ def ai_insights_server(
             return True
         return current_page.get() == "ai_insights"
     
-    # API status indicator
-    @render.ui
-    def ai_api_status():
-        if is_api_key_configured():
-            return ui.div(
-                ui.tags.span("✓", style="color: #10B981; font-weight: bold;"),
-                " API configured and ready",
-                style="background: #D1FAE5; color: #065F46; padding: 8px 16px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; display: inline-block;"
-            )
-        else:
-            return ui.div(
-                ui.tags.span("⚠", style="font-weight: bold;"),
-                " AI features not configured. Set OPENAI_API_KEY environment variable to enable.",
-                style="background: #FEF3C7; color: #92400E; padding: 12px 16px; border-radius: 6px; font-size: 13px; margin-bottom: 16px;"
-            )
+    # Example query button handlers
+    EXAMPLE_QUERIES = {
+        "example_1": "Which institutions in the South grew the most in enrollment between 2023 and 2024?",
+        "example_2": "Explain the main drivers behind enrollment changes for large private universities in 2024.",
+        "example_3": "Compare Stanford to its peer institutions and show how their yield rates differ.",
+        "example_4": "Which universities had unusually high admit rates in 2024? Show a ranked list.",
+        "example_5": "Give me a national summary of the 2024 enrollment funnel and highlight key trends.",
+    }
+    
+    @reactive.effect
+    @reactive.event(input.example_1)
+    def _set_example_1():
+        ui.update_text_area("ai_prompt", value=EXAMPLE_QUERIES["example_1"])
+    
+    @reactive.effect
+    @reactive.event(input.example_2)
+    def _set_example_2():
+        ui.update_text_area("ai_prompt", value=EXAMPLE_QUERIES["example_2"])
+    
+    @reactive.effect
+    @reactive.event(input.example_3)
+    def _set_example_3():
+        ui.update_text_area("ai_prompt", value=EXAMPLE_QUERIES["example_3"])
+    
+    @reactive.effect
+    @reactive.event(input.example_4)
+    def _set_example_4():
+        ui.update_text_area("ai_prompt", value=EXAMPLE_QUERIES["example_4"])
+    
+    @reactive.effect
+    @reactive.event(input.example_5)
+    def _set_example_5():
+        ui.update_text_area("ai_prompt", value=EXAMPLE_QUERIES["example_5"])
     
     # Loading status text
     @render.text

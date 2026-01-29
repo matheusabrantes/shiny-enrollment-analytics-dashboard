@@ -104,7 +104,7 @@ shiny run app.py
 
 ## 🤖 AI Insights (LLM-powered analytics)
 
-The **AI Insights** page provides natural language querying of enrollment data using OpenAI's GPT-5.2 model.
+The **AI Insights** page provides natural language querying of enrollment data using OpenAI's gpt-5-mini model.
 
 ### Features
 - **Natural Language Queries:** Ask questions about enrollment data in plain English

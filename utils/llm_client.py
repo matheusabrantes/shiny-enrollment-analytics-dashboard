@@ -153,6 +153,39 @@ The JSON must have exactly this structure:
 """
 
 
+def _extract_response_text(response: Any) -> str:
+    """Extract text content from an OpenAI Responses API object."""
+    output_text = getattr(response, "output_text", None)
+    if isinstance(output_text, str) and output_text.strip():
+        return output_text.strip()
+
+    output = getattr(response, "output", None)
+    if not isinstance(output, list):
+        return ""
+
+    chunks: List[str] = []
+    for item in output:
+        content = getattr(item, "content", None)
+        if content is None and isinstance(item, dict):
+            content = item.get("content")
+
+        if isinstance(content, list):
+            for block in content:
+                if isinstance(block, dict):
+                    if block.get("type") in {"output_text", "text"}:
+                        text = block.get("text")
+                        if text:
+                            chunks.append(text)
+                else:
+                    text = getattr(block, "text", None)
+                    if text:
+                        chunks.append(text)
+        elif isinstance(content, str):
+            chunks.append(content)
+
+    return "\n".join(chunks).strip()
+
+
 def parse_ai_response(response_text: str) -> AIInsightResponse:
     """
     Parse the AI response text into a structured AIInsightResponse.
@@ -249,17 +282,37 @@ def generate_ai_insight(
         
         system_prompt = build_system_prompt(data_schema)
         
-        response = client.chat.completions.create(
-            model="gpt-5.2",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_query}
+        response = client.responses.create(
+            model="gpt-5-mini",
+            input=[
+                {
+                    "role": "system",
+                    "content": [
+                        {"type": "input_text", "text": system_prompt}
+                    ]
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "input_text", "text": user_query}
+                    ]
+                }
             ],
-            temperature=0.3,
-            max_tokens=1000
+            text={
+                "format": {
+                    "type": "text"
+                }
+            }
         )
         
-        response_text = response.choices[0].message.content
+        response_text = _extract_response_text(response)
+        if not response_text:
+            return AIInsightResponse(
+                summary_text="",
+                filters={},
+                chart={},
+                error="AI service error: empty response received."
+            )
         return parse_ai_response(response_text)
         
     except ImportError:
