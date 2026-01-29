@@ -102,6 +102,47 @@ shiny run app.py
 
 ---
 
+## 🤖 AI Insights (LLM-powered analytics)
+
+The **AI Insights** page provides natural language querying of enrollment data using OpenAI's GPT-5.2 model.
+
+### Features
+- **Natural Language Queries:** Ask questions about enrollment data in plain English
+- **AI-Generated Insights:** Receive executive-style textual explanations
+- **Dynamic Visualizations:** Auto-generated Plotly charts based on your query
+- **Smart Filtering:** AI automatically applies relevant data filters
+
+### Example Queries
+- "Which institutions have the highest yield rates in the Northeast?"
+- "Compare enrollment trends for large institutions from 2022-2024"
+- "What's the relationship between admit rate and yield rate?"
+- "Show me the most diverse institutions by region"
+
+### Configuration
+
+To enable AI features, set your OpenAI API key:
+
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` and add your API key:
+   ```
+   OPENAI_API_KEY=your_actual_api_key_here
+   ```
+
+3. **Important:** Never commit `.env` to version control. It is already in `.gitignore`.
+
+### Behavior Without API Key
+
+If `OPENAI_API_KEY` is not set:
+- The app will still run normally
+- All other dashboard pages work as expected
+- The AI Insights page displays a message: "AI features are not configured. Please set OPENAI_API_KEY."
+
+---
+
 ## 🎨 Design Decisions
 
 ### Color Palette
@@ -136,21 +177,25 @@ shiny-enrollment-analytics-dashboard/
 ├── app.py                      # Main Shiny application
 ├── requirements.txt            # Python dependencies
 ├── .gitignore                  # Git ignore file
+├── .env.example                # Environment variables template
 ├── README.md                   # Project documentation
 ├── data/
 │   └── ipeds_enrollment_data.csv   # IPEDS enrollment data
-├── components/
+├── modules/
 │   ├── __init__.py
-│   ├── header.py               # Header component
-│   ├── filters.py              # Filter sidebar component
-│   ├── funnel_chart.py         # Enrollment funnel visualization
-│   ├── trends_chart.py         # Conversion trends over time
-│   ├── demographics_chart.py   # Demographics breakdown
-│   └── comparison_chart.py     # Institution comparison
+│   ├── page_overview.py        # Overview page
+│   ├── page_benchmarking.py    # Benchmarking page
+│   ├── page_institution_profile.py  # Institution profile page
+│   ├── page_simulator.py       # Enrollment simulator page
+│   ├── page_ai_insights.py     # AI Insights page (LLM-powered)
+│   ├── components_charts.py    # Plotly chart components
+│   ├── components_kpis.py      # KPI card components
+│   └── components_tables.py    # Table components
 └── utils/
     ├── __init__.py
     ├── data_loader.py          # Data loading utilities
     ├── calculations.py         # Metric calculations
+    ├── llm_client.py           # OpenAI API integration
     └── styling.py              # Brand colors & themes
 ```
 

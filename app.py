@@ -27,6 +27,7 @@ from modules.page_overview import overview_ui, overview_server
 from modules.page_benchmarking import benchmarking_ui, benchmarking_server
 from modules.page_institution_profile import profile_ui, profile_server
 from modules.page_simulator import simulator_ui, simulator_server
+from modules.page_ai_insights import ai_insights_ui, ai_insights_server
 
 
 # Load data at startup
@@ -747,7 +748,7 @@ app_ui = ui.page_fluid(
             }
             
             document.addEventListener('DOMContentLoaded', function() {
-                ['nav_overview', 'nav_benchmarking', 'nav_profile', 'nav_simulator'].forEach(function(id) {
+                ['nav_overview', 'nav_benchmarking', 'nav_profile', 'nav_simulator', 'nav_ai_insights'].forEach(function(id) {
                     var btn = document.getElementById(id);
                     if (btn) {
                         btn.addEventListener('click', function() {
@@ -849,6 +850,7 @@ app_ui = ui.page_fluid(
                     ui.input_action_button("nav_benchmarking", "Benchmarking", class_="nav-link"),
                     ui.input_action_button("nav_profile", "Institution Profile", class_="nav-link"),
                     ui.input_action_button("nav_simulator", "Simulator", class_="nav-link"),
+                    ui.input_action_button("nav_ai_insights", "✨ AI Insights", class_="nav-link"),
                     class_="navbar-nav"
                 ),
                 
@@ -914,6 +916,11 @@ def server(input, output, session):
     @reactive.event(input.nav_simulator)
     def nav_to_simulator():
         current_page.set("simulator")
+    
+    @reactive.effect
+    @reactive.event(input.nav_ai_insights)
+    def nav_to_ai_insights():
+        current_page.set("ai_insights")
     
     # =========================================================================
     # Global Filter State
@@ -1008,6 +1015,8 @@ def server(input, output, session):
             return profile_ui()
         elif page == "simulator":
             return simulator_ui()
+        elif page == "ai_insights":
+            return ai_insights_ui()
         else:
             return overview_ui()
     
@@ -1055,6 +1064,17 @@ def server(input, output, session):
         selected_years=selected_years_list,
         selected_institution=selected_institution,
         latest_year=latest_year,
+        institutions_list=INSTITUTIONS,
+        current_page=current_page
+    )
+    
+    ai_insights_server(
+        input, output, session,
+        filtered_data=filtered_data,
+        full_data=full_data,
+        years_list=YEARS,
+        regions_list=REGIONS,
+        sizes_list=SIZES,
         institutions_list=INSTITUTIONS,
         current_page=current_page
     )
