@@ -9,6 +9,13 @@ Author: Matheus Abrantes
 Date: January 2026
 """
 
+# Load environment variables from .env file (for API keys, etc.)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv not installed, rely on system environment variables
+
 from shiny import App, reactive, render, ui
 from shinywidgets import output_widget, render_widget
 import pandas as pd
