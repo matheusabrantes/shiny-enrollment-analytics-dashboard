@@ -38,11 +38,11 @@ def ai_insights_ui():
             ui.div(
                 # Example query buttons (above the input)
                 ui.div(
-                    _create_example_button("example_1", "Which institutions in the South grew the most in enrollment between 2023 and 2024?"),
-                    _create_example_button("example_2", "Explain the main drivers behind enrollment changes for large private universities in 2024."),
-                    _create_example_button("example_3", "Compare Stanford to its peer institutions and show how their yield rates differ."),
-                    _create_example_button("example_4", "Which universities had unusually high admit rates in 2024? Show a ranked list."),
-                    _create_example_button("example_5", "Give me a national summary of the 2024 enrollment funnel and highlight key trends."),
+                    _create_example_button("example_1", "Show me the large institutions that had the biggest enrollment growth in 2024, and highlight any important patterns across regions or segments."),
+                    _create_example_button("example_2", "Which institutions in the South grew the most in enrollment between 2023 and 2024?"),
+                    _create_example_button("example_3", "Explain the main drivers behind enrollment changes for large universities in 2024."),
+                    _create_example_button("example_4", "Compare Stanford to its peer institutions and show how their yield rates differ."),
+                    _create_example_button("example_5", "Which universities had unusually high admit rates in 2024? Show a ranked list."),
                     style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;"
                 ),
                 # Text input
@@ -122,11 +122,11 @@ def ai_insights_server(
     
     # Example query button handlers
     EXAMPLE_QUERIES = {
-        "example_1": "Which institutions in the South grew the most in enrollment between 2023 and 2024?",
-        "example_2": "Explain the main drivers behind enrollment changes for large private universities in 2024.",
-        "example_3": "Compare Stanford to its peer institutions and show how their yield rates differ.",
-        "example_4": "Which universities had unusually high admit rates in 2024? Show a ranked list.",
-        "example_5": "Give me a national summary of the 2024 enrollment funnel and highlight key trends.",
+        "example_1": "Show me the large institutions that had the biggest enrollment growth in 2024, and highlight any important patterns across regions or segments.",
+        "example_2": "Which institutions in the South grew the most in enrollment between 2023 and 2024?",
+        "example_3": "Explain the main drivers behind enrollment changes for large universities in 2024.",
+        "example_4": "Compare Stanford to its peer institutions and show how their yield rates differ.",
+        "example_5": "Which universities had unusually high admit rates in 2024? Show a ranked list.",
     }
     
     @reactive.effect
