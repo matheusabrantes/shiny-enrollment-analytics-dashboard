@@ -17,6 +17,9 @@ from utils.llm_client import (
     AIInsightResponse
 )
 
+DERIVED_GROWTH_PCT = "enrollment_growth_pct"
+DERIVED_GROWTH_ABS = "enrollment_growth_abs"
+
 
 def ai_insights_ui():
     """Create the AI Insights page UI."""
@@ -329,13 +332,6 @@ def ai_insights_server(
         chart_spec = response.chart
         filters = response.filters
         
-        # Get and filter data
-        df = full_data()
-        df = _apply_ai_filters(df, filters)
-        
-        if df.empty:
-            return _create_empty_chart("No data matches the specified filters")
-        
         # Generate chart based on specification
         chart_type = chart_spec.get('type', 'bar')
         x_col = chart_spec.get('x', 'institution_name')
@@ -343,8 +339,29 @@ def ai_insights_server(
         sort_order = chart_spec.get('sort', 'desc')
         top_n = chart_spec.get('top_n', 10)
         color_col = chart_spec.get('color')
-        
+
         try:
+            if y_col in {DERIVED_GROWTH_PCT, DERIVED_GROWTH_ABS}:
+                df = full_data()
+                df = _apply_ai_filters(df, _drop_year_filter(filters))
+                if df.empty:
+                    return _create_empty_chart("No data matches the specified filters")
+                return _create_enrollment_growth_chart(
+                    df,
+                    y_col=y_col,
+                    sort_order=sort_order,
+                    top_n=top_n,
+                    color_col=color_col,
+                    target_year=filters.get("year")
+                )
+
+            # Get and filter data for standard charts
+            df = full_data()
+            df = _apply_ai_filters(df, filters)
+            
+            if df.empty:
+                return _create_empty_chart("No data matches the specified filters")
+
             if chart_type == 'bar':
                 return _create_ai_bar_chart(df, x_col, y_col, sort_order, top_n, color_col)
             elif chart_type == 'line':
@@ -391,6 +408,13 @@ def _apply_ai_filters(df: pd.DataFrame, filters: dict) -> pd.DataFrame:
     return df
 
 
+def _drop_year_filter(filters: dict) -> dict:
+    """Remove year filter for derived metrics that require prior-year data."""
+    if not filters:
+        return {}
+    return {key: value for key, value in filters.items() if key != "year"}
+
+
 def _create_empty_chart(message: str) -> go.Figure:
     """Create an empty chart with a message."""
     fig = go.Figure()
@@ -407,6 +431,121 @@ def _create_empty_chart(message: str) -> go.Figure:
         xaxis=dict(visible=False),
         yaxis=dict(visible=False)
     )
+    return fig
+
+
+def _create_enrollment_growth_chart(
+    df: pd.DataFrame,
+    y_col: str,
+    sort_order: str = 'desc',
+    top_n: int = 10,
+    color_col: str = None,
+    target_year: int = None
+) -> go.Figure:
+    """Create a bar chart for enrollment growth between years."""
+    if 'year' not in df.columns or 'enrolled_total' not in df.columns:
+        return _create_empty_chart("Enrollment growth requires year and enrolled_total data")
+
+    year = None
+    if isinstance(target_year, int):
+        year = target_year
+    elif isinstance(target_year, list) and target_year:
+        year = max([y for y in target_year if isinstance(y, int)], default=None)
+
+    if year is None:
+        year = int(df['year'].max())
+
+    prev_year = year - 1
+    df = df[df['year'].isin([prev_year, year])]
+    if df.empty:
+        return _create_empty_chart(f"No data found for {prev_year} and {year}")
+
+    meta_cols = {}
+    for col in ['region', 'institution_size', 'state']:
+        if col in df.columns:
+            meta_cols[col] = 'first'
+
+    agg_cols = {'enrolled_total': 'sum'}
+    if meta_cols:
+        agg_cols.update(meta_cols)
+
+    agg_df = df.groupby(['institution_name', 'year']).agg(agg_cols).reset_index()
+    pivot = agg_df.pivot(index='institution_name', columns='year', values='enrolled_total')
+    if prev_year not in pivot.columns or year not in pivot.columns:
+        return _create_empty_chart(f"Missing enrollment totals for {prev_year} or {year}")
+    pivot = pivot.dropna(subset=[prev_year, year], how='any').reset_index()
+
+    if pivot.empty:
+        return _create_empty_chart(f"Not enough data to compute growth for {prev_year} → {year}")
+
+    pivot['enrollment_growth_abs'] = pivot[year] - pivot[prev_year]
+    pivot['enrollment_growth_pct'] = (pivot['enrollment_growth_abs'] / pivot[prev_year]) * 100
+    pivot['enrolled_prev'] = pivot[prev_year]
+    pivot['enrolled_curr'] = pivot[year]
+
+    if meta_cols:
+        meta_df = df.groupby('institution_name').agg(meta_cols).reset_index()
+        pivot = pivot.merge(meta_df, on='institution_name', how='left')
+
+    plot_df = pivot.sort_values(y_col, ascending=sort_order != 'desc')
+    if top_n and len(plot_df) > top_n:
+        plot_df = plot_df.head(top_n) if sort_order == 'desc' else plot_df.tail(top_n)
+
+    color_col = color_col if color_col in plot_df.columns else None
+    text_fmt = "{:.1f}%" if y_col == DERIVED_GROWTH_PCT else "{:,.0f}"
+    hover_template = (
+        f"<b>%{{y}}</b>"
+        f"<br>Enrollment {prev_year}: %{{customdata[0]:,.0f}}"
+        f"<br>Enrollment {year}: %{{customdata[1]:,.0f}}"
+        f"<br>Change: %{{customdata[2]:+,.0f}}"
+        f"<br>Growth: %{{customdata[3]:.1f}}%<extra></extra>"
+    )
+
+    if color_col:
+        fig = px.bar(
+            plot_df,
+            x=y_col,
+            y='institution_name',
+            color=color_col,
+            orientation='h',
+            color_discrete_sequence=CHART_PALETTE,
+            custom_data=['enrolled_prev', 'enrolled_curr', 'enrollment_growth_abs', 'enrollment_growth_pct'],
+            text=plot_df[y_col].apply(lambda x: text_fmt.format(x))
+        )
+        fig.update_traces(hovertemplate=hover_template, textposition='outside')
+    else:
+        fig = go.Figure(go.Bar(
+            x=plot_df[y_col],
+            y=plot_df['institution_name'],
+            orientation='h',
+            marker_color=COLORS['accent'],
+            text=plot_df[y_col].apply(lambda x: text_fmt.format(x)),
+            textposition='outside',
+            customdata=plot_df[['enrolled_prev', 'enrolled_curr', 'enrollment_growth_abs', 'enrollment_growth_pct']].to_numpy(),
+            hovertemplate=hover_template
+        ))
+
+    max_val = plot_df[y_col].max() if not plot_df.empty else 0
+    min_val = plot_df[y_col].min() if not plot_df.empty else 0
+    x_padding = max_val * 0.25 if max_val else 1
+    x_min = min(0, min_val)
+
+    fig.update_layout(
+        **LAYOUT_DEFAULTS,
+        title=None,
+        xaxis=dict(
+            title=_format_column_name(y_col),
+            range=[x_min, max_val + x_padding],
+        ),
+        yaxis=dict(
+            title=None,
+            autorange='reversed',
+            tickfont=dict(size=11)
+        ),
+        height=max(350, len(plot_df) * 35),
+        margin={'l': 200, 'r': 60, 't': 20, 'b': 50},
+    )
+
     return fig
 
 
@@ -677,5 +816,7 @@ def _format_column_name(col_name: str) -> str:
         'region': 'Region',
         'institution_size': 'Institution Size',
         'state': 'State',
+        'enrollment_growth_pct': 'Enrollment Growth (%)',
+        'enrollment_growth_abs': 'Enrollment Growth (Count)',
     }
     return name_map.get(col_name, col_name.replace('_', ' ').title())

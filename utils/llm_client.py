@@ -66,6 +66,10 @@ You have access to higher education enrollment data from IPEDS (Integrated Posts
 - **pct_other**: Percentage of students from other racial/ethnic groups
 - **diversity_index**: A calculated diversity index (0-100 scale)
 
+### Derived Metrics You Can Use In Charts:
+- **enrollment_growth_pct**: Percent change in enrolled_total from the previous year to the selected year
+- **enrollment_growth_abs**: Absolute change in enrolled_total from the previous year to the selected year
+
 ### Aggregate Statistics (across all data):
 """
     for metric, metric_stats in stats.items():
@@ -142,6 +146,8 @@ The JSON must have exactly this structure:
 - sort: "desc" or "asc" (optional, for bar charts)
 - top_n: integer limit (optional, for bar charts, default 10)
 - color: column name for color grouping (optional)
+ - For growth questions: use y as "enrollment_growth_pct" (or "enrollment_growth_abs") and set filters.year to the ending year (e.g., 2024 implies growth from 2023 → 2024)
+ - If the user asks for patterns across regions or segments, set color to "region" or "institution_size" respectively
 
 ## Important Rules:
 1. Output ONLY valid JSON - no markdown code blocks, no text before or after
@@ -150,6 +156,7 @@ The JSON must have exactly this structure:
 4. For time trends, use line chart with year on x-axis
 5. For metric relationships, use scatter chart
 6. Always provide meaningful filters that make sense for the question
+7. If the question asks for growth between years, use enrollment_growth_pct unless the user explicitly requests absolute change
 """
 
 
