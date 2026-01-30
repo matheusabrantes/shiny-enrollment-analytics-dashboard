@@ -8,6 +8,8 @@ from shinywidgets import output_widget, render_widget
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
+import re
+from typing import Optional, Dict
 
 from .components_charts import COLORS, CHART_PALETTE, LAYOUT_DEFAULTS
 from utils.llm_client import (
@@ -19,6 +21,8 @@ from utils.llm_client import (
 
 DERIVED_GROWTH_PCT = "enrollment_growth_pct"
 DERIVED_GROWTH_ABS = "enrollment_growth_abs"
+DERIVED_YIELD_GROWTH_PCT = "yield_rate_growth_pct"
+DERIVED_YIELD_GROWTH_ABS = "yield_rate_growth_abs"
 
 
 def ai_insights_ui():
@@ -186,6 +190,51 @@ def ai_insights_server(
         is_loading.set(True)
         
         try:
+            # Deterministic answer for yield rate growth questions
+            yield_growth_request = _detect_yield_rate_growth_request(prompt)
+            if yield_growth_request is not None:
+                df = full_data()
+                result = _compute_yield_rate_growth_winner(
+                    df,
+                    target_year=yield_growth_request["target_year"],
+                    base_year=yield_growth_request["base_year"],
+                )
+                if result.get("error"):
+                    ai_response.set(AIInsightResponse(
+                        summary_text="",
+                        filters={},
+                        chart={},
+                        error=result["error"]
+                    ))
+                    return
+
+                enrolled_text = (
+                    f"{result['enrolled_total']:,} matriculados"
+                    if result["enrolled_total"] is not None
+                    else "matriculados não disponíveis"
+                )
+                summary = (
+                    f"A universidade com maior crescimento percentual de yield rate entre "
+                    f"{yield_growth_request['base_year']} e {yield_growth_request['target_year']} "
+                    f"foi {result['institution']}. O crescimento foi de {result['growth_pct']:.1f}%, "
+                    f"com yield rate atual de {result['yield_rate']:.1f}% em {yield_growth_request['target_year']} "
+                    f"e {enrolled_text}."
+                )
+                response = AIInsightResponse(
+                    summary_text=summary,
+                    filters={"year": yield_growth_request["target_year"]},
+                    chart={
+                        "type": "bar",
+                        "x": "institution_name",
+                        "y": DERIVED_YIELD_GROWTH_PCT,
+                        "sort": "desc",
+                        "top_n": 10
+                    }
+                )
+                ai_response.set(response)
+                ai_chart_spec.set(response.chart)
+                return
+
             # Build data schema description
             df = full_data()
             
@@ -361,6 +410,19 @@ def ai_insights_server(
                     color_col=color_col,
                     target_year=filters.get("year")
                 )
+            if y_col in {DERIVED_YIELD_GROWTH_PCT, DERIVED_YIELD_GROWTH_ABS}:
+                df = full_data()
+                df = _apply_ai_filters(df, _drop_year_filter(filters))
+                if df.empty:
+                    return _create_empty_chart("No data matches the specified filters")
+                return _create_yield_rate_growth_chart(
+                    df,
+                    y_col=y_col,
+                    sort_order=sort_order,
+                    top_n=top_n,
+                    color_col=color_col,
+                    target_year=filters.get("year")
+                )
 
             # Get and filter data for standard charts
             df = full_data()
@@ -420,6 +482,74 @@ def _drop_year_filter(filters: dict) -> dict:
     if not filters:
         return {}
     return {key: value for key, value in filters.items() if key != "year"}
+
+
+def _detect_yield_rate_growth_request(prompt: str) -> Optional[Dict[str, int]]:
+    """Detect yield rate growth questions and extract year range."""
+    if not prompt:
+        return None
+
+    text = prompt.lower()
+    if not ("yield" in text or "yield rate" in text or "taxa de yield" in text):
+        return None
+    if not ("cres" in text or "growth" in text or "aumento" in text):
+        return None
+    if not ("percent" in text or "%" in text or "percentual" in text):
+        return None
+
+    years = [int(y) for y in re.findall(r"\b(?:19|20)\d{2}\b", text)]
+    if len(years) >= 2:
+        base_year = min(years)
+        target_year = max(years)
+    elif len(years) == 1:
+        target_year = years[0]
+        base_year = target_year - 1
+    else:
+        return None
+
+    return {"base_year": base_year, "target_year": target_year}
+
+
+def _compute_yield_rate_growth_winner(
+    df: pd.DataFrame,
+    target_year: int,
+    base_year: int,
+) -> dict:
+    """Compute the institution with the largest % growth in yield rate."""
+    required_cols = {"year", "institution_name", "yield_rate"}
+    if not required_cols.issubset(df.columns):
+        return {"error": "Required columns (year, institution_name, yield_rate) not found."}
+
+    df_years = df[df["year"].isin([base_year, target_year])]
+    if df_years.empty:
+        return {"error": f"No data found for {base_year} and {target_year}."}
+
+    agg_df = df_years.groupby(["institution_name", "year"]).agg({"yield_rate": "mean"}).reset_index()
+    pivot = agg_df.pivot(index="institution_name", columns="year", values="yield_rate")
+    if base_year not in pivot.columns or target_year not in pivot.columns:
+        return {"error": f"Missing yield_rate data for {base_year} or {target_year}."}
+
+    pivot = pivot.dropna(subset=[base_year, target_year], how="any")
+    pivot = pivot[pivot[base_year] > 0]
+    if pivot.empty:
+        return {"error": "Not enough data to compute yield rate growth."}
+
+    pivot["growth_abs"] = pivot[target_year] - pivot[base_year]
+    pivot["growth_pct"] = (pivot["growth_abs"] / pivot[base_year]) * 100
+
+    winner = pivot.sort_values("growth_pct", ascending=False).iloc[0]
+
+    enrolled_total = None
+    if "enrolled_total" in df.columns:
+        enroll_df = df[df["year"] == target_year].groupby("institution_name")["enrolled_total"].sum()
+        enrolled_total = enroll_df.get(winner.name)
+
+    return {
+        "institution": winner.name,
+        "growth_pct": float(winner["growth_pct"]),
+        "yield_rate": float(winner[target_year]),
+        "enrolled_total": int(enrolled_total) if pd.notna(enrolled_total) else None,
+    }
 
 
 def _create_empty_chart(message: str) -> go.Figure:
@@ -535,6 +665,125 @@ def _create_enrollment_growth_chart(
     max_val = plot_df[y_col].max() if not plot_df.empty else 0
     min_val = plot_df[y_col].min() if not plot_df.empty else 0
     x_padding = max_val * 0.25 if max_val else 1
+    x_min = min(0, min_val)
+
+    fig.update_layout(
+        **LAYOUT_DEFAULTS,
+        title=None,
+        xaxis=dict(
+            title=_format_column_name(y_col),
+            range=[x_min, max_val + x_padding],
+        ),
+        yaxis=dict(
+            title=None,
+            autorange='reversed',
+            tickfont=dict(size=11)
+        ),
+        height=max(350, len(plot_df) * 35),
+        margin={'l': 200, 'r': 60, 't': 20, 'b': 50},
+    )
+
+    return fig
+
+
+def _create_yield_rate_growth_chart(
+    df: pd.DataFrame,
+    y_col: str,
+    sort_order: str = 'desc',
+    top_n: int = 10,
+    color_col: str = None,
+    target_year: int = None
+) -> go.Figure:
+    """Create a bar chart for yield rate growth between years."""
+    if 'year' not in df.columns or 'yield_rate' not in df.columns:
+        return _create_empty_chart("Yield rate growth requires year and yield_rate data")
+
+    year = None
+    if isinstance(target_year, int):
+        year = target_year
+    elif isinstance(target_year, list) and target_year:
+        year = max([y for y in target_year if isinstance(y, int)], default=None)
+
+    if year is None:
+        year = int(df['year'].max())
+
+    prev_year = year - 1
+    df = df[df['year'].isin([prev_year, year])]
+    if df.empty:
+        return _create_empty_chart(f"No data found for {prev_year} and {year}")
+
+    meta_cols = {}
+    for col in ['region', 'institution_size', 'state']:
+        if col in df.columns:
+            meta_cols[col] = 'first'
+
+    agg_cols = {'yield_rate': 'mean'}
+    if meta_cols:
+        agg_cols.update(meta_cols)
+
+    agg_df = df.groupby(['institution_name', 'year']).agg(agg_cols).reset_index()
+    pivot = agg_df.pivot(index='institution_name', columns='year', values='yield_rate')
+    if prev_year not in pivot.columns or year not in pivot.columns:
+        return _create_empty_chart(f"Missing yield rate data for {prev_year} or {year}")
+    pivot = pivot.dropna(subset=[prev_year, year], how='any').reset_index()
+
+    if pivot.empty:
+        return _create_empty_chart(f"Not enough data to compute yield rate growth for {prev_year} → {year}")
+
+    pivot['yield_rate_growth_abs'] = pivot[year] - pivot[prev_year]
+    pivot['yield_rate_growth_pct'] = (pivot['yield_rate_growth_abs'] / pivot[prev_year]) * 100
+    pivot['yield_prev'] = pivot[prev_year]
+    pivot['yield_curr'] = pivot[year]
+
+    if meta_cols:
+        meta_df = df.groupby('institution_name').agg(meta_cols).reset_index()
+        pivot = pivot.merge(meta_df, on='institution_name', how='left')
+
+    plot_df = pivot.sort_values(y_col, ascending=sort_order != 'desc')
+    if top_n and len(plot_df) > top_n:
+        plot_df = plot_df.head(top_n) if sort_order == 'desc' else plot_df.tail(top_n)
+
+    color_col = color_col if color_col in plot_df.columns else None
+    if y_col == DERIVED_YIELD_GROWTH_PCT:
+        text_fmt = "{:.1f}%"
+    else:
+        text_fmt = "{:.1f} pp"
+
+    hover_template = (
+        f"<b>%{{y}}</b>"
+        f"<br>Yield {prev_year}: %{{customdata[0]:.1f}}%"
+        f"<br>Yield {year}: %{{customdata[1]:.1f}}%"
+        f"<br>Change: %{{customdata[2]:+.1f}} pp"
+        f"<br>Growth: %{{customdata[3]:+.1f}}%<extra></extra>"
+    )
+
+    if color_col:
+        fig = px.bar(
+            plot_df,
+            x=y_col,
+            y='institution_name',
+            color=color_col,
+            orientation='h',
+            color_discrete_sequence=CHART_PALETTE,
+            custom_data=['yield_prev', 'yield_curr', 'yield_rate_growth_abs', 'yield_rate_growth_pct'],
+            text=plot_df[y_col].apply(lambda x: text_fmt.format(x))
+        )
+        fig.update_traces(hovertemplate=hover_template, textposition='outside')
+    else:
+        fig = go.Figure(go.Bar(
+            x=plot_df[y_col],
+            y=plot_df['institution_name'],
+            orientation='h',
+            marker_color=COLORS['accent'],
+            text=plot_df[y_col].apply(lambda x: text_fmt.format(x)),
+            textposition='outside',
+            customdata=plot_df[['yield_prev', 'yield_curr', 'yield_rate_growth_abs', 'yield_rate_growth_pct']].to_numpy(),
+            hovertemplate=hover_template
+        ))
+
+    max_val = plot_df[y_col].max() if not plot_df.empty else 0
+    min_val = plot_df[y_col].min() if not plot_df.empty else 0
+    x_padding = max(abs(max_val), abs(min_val)) * 0.25 if max_val or min_val else 1
     x_min = min(0, min_val)
 
     fig.update_layout(
@@ -844,5 +1093,7 @@ def _format_column_name(col_name: str) -> str:
         'state': 'State',
         'enrollment_growth_pct': 'Enrollment Growth (%)',
         'enrollment_growth_abs': 'Enrollment Growth (Count)',
+        'yield_rate_growth_pct': 'Yield Rate Growth (%)',
+        'yield_rate_growth_abs': 'Yield Rate Growth (pp)',
     }
     return name_map.get(col_name, col_name.replace('_', ' ').title())
