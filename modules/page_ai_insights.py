@@ -60,7 +60,7 @@ def ai_insights_ui():
                     ui.input_action_button(
                         "ai_generate",
                         "✨ Generate Insight",
-                        class_="btn btn-primary",
+                        class_="btn btn-primary ai-generate-btn",
                         style="background: linear-gradient(135deg, #0F172A 0%, #2563EB 100%); border: none; padding: 10px 24px; font-weight: 500;"
                     ),
                     ui.span(
@@ -113,8 +113,9 @@ def ai_insights_server(
 ):
     """Server logic for the AI Insights page."""
     
-    # Store the last AI response
+    # Store the last AI response and the chart payload for the current prompt
     ai_response = reactive.value(None)
+    ai_chart_spec = reactive.value(None)
     is_loading = reactive.value(False)
     
     def is_active():
@@ -168,6 +169,8 @@ def ai_insights_server(
     @reactive.effect
     @reactive.event(input.ai_generate)
     def handle_generate():
+        # Clear any prior chart immediately before generating a new response
+        ai_chart_spec.set(None)
         prompt = input.ai_prompt()
         
         # Validate prompt
@@ -212,6 +215,8 @@ def ai_insights_server(
             # Generate AI insight
             response = generate_ai_insight(prompt.strip(), data_schema)
             ai_response.set(response)
+            if isinstance(response.chart, dict) and response.chart:
+                ai_chart_spec.set(response.chart)
             
         except Exception as e:
             ai_response.set(AIInsightResponse(
@@ -227,6 +232,7 @@ def ai_insights_server(
     @render.ui
     def ai_results_section():
         response = ai_response.get()
+        chart_spec = ai_chart_spec.get()
         
         if response is None:
             return ui.div()
@@ -251,8 +257,7 @@ def ai_insights_server(
                 style="margin-top: 24px;"
             )
         
-        return ui.div(
-            # Summary text card
+        sections = [
             ui.div(
                 ui.div(
                     ui.h3("AI Analysis", class_="card-title"),
@@ -266,27 +271,29 @@ def ai_insights_server(
                         ),
                         style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); padding: 20px; border-radius: 8px; border-left: 4px solid #2563EB;"
                     ),
-                    # Show applied filters if any
                     ui.output_ui("ai_filters_summary"),
                     class_="card-body"
                 ),
                 class_="card chart-section"
-            ),
-            
-            # Chart card
-            ui.div(
+            )
+        ]
+
+        if chart_spec:
+            sections.append(
                 ui.div(
-                    ui.h3("Visualization", class_="card-title"),
-                    class_="card-header"
-                ),
-                ui.div(
-                    output_widget("ai_insight_chart"),
-                    class_="card-body"
-                ),
-                class_="card chart-section"
-            ),
-            style="margin-top: 24px;"
-        )
+                    ui.div(
+                        ui.h3("Visualization", class_="card-title"),
+                        class_="card-header"
+                    ),
+                    ui.div(
+                        output_widget("ai_insight_chart"),
+                        class_="card-body"
+                    ),
+                    class_="card chart-section"
+                )
+            )
+
+        return ui.div(*sections, style="margin-top: 24px;")
     
     # Render filters summary
     @render.ui
@@ -323,13 +330,13 @@ def ai_insights_server(
     @render_widget
     def ai_insight_chart():
         if not is_active():
-            return _create_empty_chart("Navigate to AI Insights to view chart")
+            return None
         
         response = ai_response.get()
-        if response is None or response.error:
-            return _create_empty_chart("Generate an insight to see visualization")
+        chart_spec = ai_chart_spec.get()
+        if response is None or response.error or not chart_spec:
+            return None
         
-        chart_spec = response.chart
         filters = response.filters
         
         # Generate chart based on specification
@@ -740,23 +747,42 @@ def _create_ai_scatter_chart(
     fig = go.Figure()
     
     if color_col and color_col in plot_df.columns:
-        groups = plot_df[color_col].unique()
-        for i, group in enumerate(groups[:7]):
-            group_df = plot_df[plot_df[color_col] == group]
+        if pd.api.types.is_numeric_dtype(plot_df[color_col]):
             fig.add_trace(go.Scatter(
-                x=group_df[x_col],
-                y=group_df[y_col],
+                x=plot_df[x_col],
+                y=plot_df[y_col],
                 mode='markers',
-                name=str(group),
                 marker=dict(
                     size=10,
-                    color=CHART_PALETTE[i % len(CHART_PALETTE)],
+                    color=plot_df[color_col],
+                    colorscale='Viridis',
+                    showscale=True,
+                    colorbar=dict(title=_format_column_name(color_col)),
                     opacity=0.7,
                     line=dict(width=1, color='white')
                 ),
-                text=group_df.get('institution_name', ''),
-                hovertemplate=f"<b>%{{text}}</b><br>{x_col}: %{{x:,.0f}}<br>{y_col}: %{{y:.1f}}<extra></extra>"
+                text=plot_df.get('institution_name', ''),
+                hovertemplate=f"<b>%{{text}}</b><br>{x_col}: %{{x:,.0f}}<br>{y_col}: %{{y:.1f}}<extra></extra>",
+                showlegend=False
             ))
+        else:
+            groups = plot_df[color_col].unique()
+            for i, group in enumerate(groups[:7]):
+                group_df = plot_df[plot_df[color_col] == group]
+                fig.add_trace(go.Scatter(
+                    x=group_df[x_col],
+                    y=group_df[y_col],
+                    mode='markers',
+                    name=str(group),
+                    marker=dict(
+                        size=10,
+                        color=CHART_PALETTE[i % len(CHART_PALETTE)],
+                        opacity=0.7,
+                        line=dict(width=1, color='white')
+                    ),
+                    text=group_df.get('institution_name', ''),
+                    hovertemplate=f"<b>%{{text}}</b><br>{x_col}: %{{x:,.0f}}<br>{y_col}: %{{y:.1f}}<extra></extra>"
+                ))
     else:
         fig.add_trace(go.Scatter(
             x=plot_df[x_col],

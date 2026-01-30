@@ -225,17 +225,20 @@ def parse_ai_response(response_text: str) -> AIInsightResponse:
         if not isinstance(filters, dict):
             filters = {}
         
-        chart = data.get("chart", {})
-        if not isinstance(chart, dict):
-            chart = {"type": "bar", "x": "institution_name", "y": "yield_rate", "top_n": 10}
+        chart = data.get("chart", None)
+        if chart is None:
+            chart = {}
+        elif not isinstance(chart, dict):
+            chart = {}
         
-        # Ensure chart has required fields
-        if "type" not in chart:
-            chart["type"] = "bar"
-        if "x" not in chart:
-            chart["x"] = "institution_name"
-        if "y" not in chart:
-            chart["y"] = "yield_rate"
+        # Only enforce defaults when a chart payload is explicitly provided
+        if chart:
+            if "type" not in chart:
+                chart["type"] = "bar"
+            if "x" not in chart:
+                chart["x"] = "institution_name"
+            if "y" not in chart:
+                chart["y"] = "yield_rate"
         
         return AIInsightResponse(
             summary_text=summary_text,
